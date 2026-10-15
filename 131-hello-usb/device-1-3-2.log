@@ -3,16 +3,16 @@
 устройство: 2e8a:000a
 серийный номер: 53032847491E7A9C
 порт: COM11
-начало: 2026-10-15T02:37:21
-   0.078 <-- Hello, world!
-   1.063 <-- Hello, world!
-   2.063 <-- Hello, world!
-   3.063 <-- Hello, world!
-   4.078 <-- Hello, world!
-   5.078 <-- Hello, world!
-   6.078 <-- Hello, world!
-   7.078 <-- Hello, world!
-   8.078 <-- Hello, world!
-   9.078 <-- Hello, world!
-  10.063 <-- Hello, world!
+начало: 2026-10-16T02:01:56
+   0.562 <-- Hello, world!
+   1.562 <-- Hello, world!
+   2.562 <-- Hello, world!
+   3.562 <-- Hello, world!
+   4.562 <-- Hello, world!
+   5.578 <-- Hello, world!
+   6.578 <-- Hello, world!
+   7.562 <-- Hello, world!
+   8.578 <-- Hello, world!
+   9.578 <-- Hello, world!
+  10.562 <-- Hello, world!
 итог: принято строк 11 за 10.0 с
