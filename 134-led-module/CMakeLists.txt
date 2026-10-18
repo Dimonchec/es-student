@@ -8,9 +8,7 @@ include(pico_sdk_import.cmake)
 project(134_led_module)
 
 pico_sdk_init()
-add_executable(${PROJECT_NAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-)
+
 add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/led/led.c
