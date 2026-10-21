@@ -4,6 +4,7 @@
 #include "led.h"
 #include "log.h"
 #include "device.h"
+#include "pico/unique_id.h"
 
 const uint BUTTON_PIN = 15;
 const uint DEBOUNCE_MS = 20;

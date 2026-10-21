@@ -3,9 +3,9 @@
 устройство: 2e8a:000a
 серийный номер: 53032847491E7A9C
 порт: COM11
-начало: 2026-10-22T02:24:03
+начало: 2026-10-22T02:31:35
    0.000 --> i
-   0.016 <-- dbg main:74 got i
+   0.016 <-- dbg main:75 got i
    0.016 <-- project: 134-led-module
    0.016 <-- repo: https://github.com/Dimonchec/es-student
    0.016 <-- board: pico
