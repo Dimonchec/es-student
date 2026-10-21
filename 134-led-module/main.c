@@ -31,6 +31,10 @@ void handle_command(int command)
     {
         log_version(); // Вызываем функцию из log.c (printf тут не нужен)
     }
+    else if (command == 'i') // <--- ВОТ ЭТА ВЕТКА
+    {
+        device_info();
+    }
     else
     {
         LOG_ERR("unknown command: %c\n", command);
