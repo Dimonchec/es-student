@@ -15,8 +15,61 @@ uint line_length = 0;
 const uint BUTTON_PIN = 15;
 const uint DEBOUNCE_MS = 20;
 
+// 1. Тип для указателя на функцию-обработчик (принимает void, возвращает void)
+typedef void (*command_handler_t)(void);
+
+// 3. Структура для хранения пары "имя команды" - "функция"
+struct command_t
+{
+    const char *name;
+    command_handler_t handler;
+};
+
 // --- ДОБАВЛЕНО: Прототип функции, чтобы read_line знала о её существовании ---
 void handle_command(const char *command);
+
+// 2. Выносим действия команд в отдельные функции
+void cmd_enable(void)
+{
+    led_set(true);
+    LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+}
+
+void cmd_disable(void)
+{
+    led_set(false);
+    LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+}
+
+void cmd_info(void)
+{
+    device_info();
+}
+
+void cmd_version(void)
+{
+    log_version();
+}
+
+// 5. Добавляем новую команду ping
+void cmd_ping(void)
+{
+    printf("pong\n");
+}
+
+// 3. Собираем таблицу команд
+const struct command_t commands[] = {
+    { "enable",  cmd_enable  },
+    { "disable", cmd_disable },
+    { "info",    cmd_info    },
+    { "version", cmd_version },
+    { "ping",    cmd_ping    }, // <-- Добавили сюда
+};
+
+// Вычисляем количество команд в массиве
+#define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
+
+
 // ------------------------------------------------------------------------------
 
 bool get_button_debounce(uint pin)
@@ -61,30 +114,24 @@ void read_line(void)
 }
 
 // --- Тело функции handle_command ---
+// 4. Заменяем цепочку поиском по таблице
 void handle_command(const char *command)
 {
-    if (strcmp(command, "enable") == 0)
+    for (uint i = 0; i < COMMAND_COUNT; i++)
     {
-        led_set(true);
-        LOG_INF("led %s\n", led_is_on() ? "on" : "off");
+        if (strcmp(command, commands[i].name) == 0)
+        {
+            // ВАЖНО: Проверка на NULL (как сказано в красной рамке)
+            if (commands[i].handler != NULL)
+            {
+                commands[i].handler(); // Вызов функции по указателю
+            }
+            return; // Команда найдена и выполнена, выходим из функции
+        }
     }
-    else if (strcmp(command, "disable") == 0)
-    {
-        led_set(false);
-        LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-    }
-    else if (strcmp(command, "info") == 0)
-    {
-        device_info();
-    }
-    else if (strcmp(command, "version") == 0)
-    {
-        log_version();
-    }
-    else
-    {
-        LOG_ERR("unknown command: %s\n", command);
-    }
+
+    // Сюда доходим, только если команда не найдена в цикле
+    LOG_ERR("unknown command: %s\n", command);
 }
 
 int main()
