@@ -42,8 +42,9 @@ void mem_info(void)
     row("text", (uintptr_t)&__boot2_end__, (uintptr_t)&__etext);
     
     // .data занимает 2 места: во флеше (хранится) и в ОЗУ (работает)
-    row("data_flash", (uintptr_t)&__etext, (uintptr_t)&__etext + ((uintptr_t)&__data_end__ - (uintptr_t)&__data_start__));
-    row("data_ram", (uintptr_t)&__data_start__, (uintptr_t)&__data_end__);
+       // Стало:
+    row("data flash", (uintptr_t)&__etext, (uintptr_t)&__etext + ((uintptr_t)&__data_end__ - (uintptr_t)&__data_start__));
+    row("data ram", (uintptr_t)&__data_start__, (uintptr_t)&__data_end__);
     
     row("bss", (uintptr_t)&__bss_start__, (uintptr_t)&__bss_end__);
     row("heap", (uintptr_t)&__bss_end__, (uintptr_t)&__HeapLimit);
