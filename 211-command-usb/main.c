@@ -6,6 +6,7 @@
 #include "log.h"
 #include "device.h"
 #include "pico/unique_id.h"
+#include "memory.h"
 
 #define LINE_SIZE 32
 
@@ -51,6 +52,11 @@ void cmd_version(void)
     log_version();
 }
 
+void cmd_mem_info(void)
+{
+    mem_info();
+}
+
 // 5. Добавляем новую команду ping
 void cmd_ping(void)
 {
@@ -63,7 +69,8 @@ const struct command_t commands[] = {
     { "disable", cmd_disable },
     { "info",    cmd_info    },
     { "version", cmd_version },
-    { "ping",    cmd_ping    }, // <-- Добавили сюда
+    { "ping",    cmd_ping    },
+    { "mem_info", cmd_mem_info },  // <-- Добавили сюда
 };
 
 // Вычисляем количество команд в массиве
