@@ -3,25 +3,26 @@
 устройство: 2e8a:000a
 серийный номер: 53032847491E7A9C
 порт: COM11
-начало: 2026-10-25T01:52:33
+начало: 2026-10-25T02:00:14
    0.000 --> enable
-   0.140 <-- enable
-   0.140 <-- dbg read_line:46 got enable
-   0.140 <-- inf handle_command:69 led on
-   2.172 --> disable
-   2.312 <-- disable
-   2.312 <-- dbg read_line:46 got disable
-   2.312 <-- inf handle_command:74 led off
-   4.343 --> info
-   4.437 <-- info
-   4.437 <-- dbg read_line:46 got info
-   4.437 <-- project: 211-command-usb
-   4.437 <-- repo: https://github.com/Dimonchec/es-student
-   4.437 <-- board: pico
-   4.437 <-- serial: 53032847491E7A9C
-   4.437 <-- chip: manufacturer 0x927, part 0x0002, revision 2
-   6.484 --> nosuchcommand
-   6.750 <-- nosuchcommand
-   6.750 <-- dbg read_line:46 got nosuchcommand
-   6.765 <-- err handle_command:86 unknown command: nosuchcommand
-итог: отправлено команд 4, принято строк 16
+   0.125 <-- enable
+   0.125 <-- dbg read_line:46 got enable
+   0.125 <-- inf handle_command:69 led on
+   2.156 --> disable
+   2.313 <-- disable
+   2.313 <-- dbg read_line:46 got disable
+   2.313 <-- inf handle_command:74 led off
+   4.313 --> info
+   4.406 <-- info
+   4.406 <-- dbg read_line:46 got info
+   4.406 <-- project: 211-command-usb
+   4.406 <-- repo: https://github.com/Dimonchec/es-student
+   4.406 <-- board: pico
+   4.406 <-- serial: 53032847491E7A9C
+   4.406 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+   4.406 <-- pico-sdk: 2.3.0
+   6.453 --> nosuchcommand
+   6.703 <-- nosuchcommand
+   6.703 <-- dbg read_line:46 got nosuchcommand
+   6.719 <-- err handle_command:86 unknown command: nosuchcommand
+итог: отправлено команд 4, принято строк 17
