@@ -7,6 +7,7 @@
 #include "device.h"
 #include "pico/unique_id.h"
 #include "memory.h"
+#include "command.h"
 
 #define LINE_SIZE 32
 
@@ -17,14 +18,15 @@ const uint BUTTON_PIN = 15;
 const uint DEBOUNCE_MS = 20;
 
 // 1. Тип для указателя на функцию-обработчик (принимает void, возвращает void)
-typedef void (*command_handler_t)(void);
+/*typedef void (*command_handler_t)(void);
 
 // 3. Структура для хранения пары "имя команды" - "функция"
 struct command_t
 {
     const char *name;
     command_handler_t handler;
-};
+};*/
+
 
 // --- ДОБАВЛЕНО: Прототип функции, чтобы read_line знала о её существовании ---
 void handle_command(const char *command);
@@ -63,6 +65,11 @@ void cmd_ping(void)
     printf("pong\n");
 }
 
+void cmd_fw_info(void)
+{
+    fw_info(); // Вызов функции из memory.c
+}
+
 // 3. Собираем таблицу команд
 const struct command_t commands[] = {
     { "enable",  cmd_enable  },
@@ -70,11 +77,14 @@ const struct command_t commands[] = {
     { "info",    cmd_info    },
     { "version", cmd_version },
     { "ping",    cmd_ping    },
-    { "mem_info", cmd_mem_info },  // <-- Добавили сюда
+    { "mem_info", cmd_mem_info }, 
+    { "fw_info", cmd_fw_info }, // <-- Добавили сюда
 };
 
+const uint command_count = sizeof(commands) / sizeof(commands[0]);
+
 // Вычисляем количество команд в массиве
-#define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
+//*#define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
 
 
 // ------------------------------------------------------------------------------
@@ -124,7 +134,7 @@ void read_line(void)
 // 4. Заменяем цепочку поиском по таблице
 void handle_command(const char *command)
 {
-    for (uint i = 0; i < COMMAND_COUNT; i++)
+    for (uint i = 0; i < command_count; i++)
     {
         if (strcmp(command, commands[i].name) == 0)
         {
