@@ -3,9 +3,14 @@
 устройство: 2e8a:000a
 серийный номер: 53032847491E7A9C
 порт: COM11
-начало: 2026-10-25T11:54:22
+начало: 2026-10-25T12:24:16
    0.000 --> dev_info
-   0.156 <-- dev_info
-   0.172 <-- dbg read_line:115 got dev_info
-   0.172 <-- err handle_command:150 unknown command: dev_info
-итог: отправлено команд 1, принято строк 3
+   0.188 <-- dev_info
+   0.188 <-- dbg read_line:121 got dev_info
+   0.188 <-- struct          address    size  offset value
+   0.188 <-- device_card     0x20000f40 20
+   0.188 <-- - revision      0x20000f51 1     17     2
+   0.188 <-- - version       0x20000f40 4     0      0x00010000
+   0.188 <-- - name          0x20000f44 13    4      es-cmd-usb
+   0.188 <-- fields 18, sizeof 20, padding 2
+итог: отправлено команд 1, принято строк 8

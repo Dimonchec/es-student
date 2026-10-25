@@ -59,6 +59,11 @@ void cmd_mem_info(void)
     mem_info();
 }
 
+void cmd_dev_info(void)
+{
+    dev_info();
+}
+
 // 5. Добавляем новую команду ping
 void cmd_ping(void)
 {
@@ -78,7 +83,8 @@ const struct command_t commands[] = {
     { "version", cmd_version },
     { "ping",    cmd_ping    },
     { "mem_info", cmd_mem_info }, 
-    { "fw_info", cmd_fw_info }, // <-- Добавили сюда
+    { "fw_info", cmd_fw_info }, 
+    { "dev_info", cmd_dev_info },// <-- Добавили сюда
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);

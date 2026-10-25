@@ -1,9 +1,18 @@
 #include "device.h"
 #include "pico/version.h"
 #include <stdio.h>
+#include <stddef.h> // Для offsetof
+#include <string.h>
 #include "pico/unique_id.h"
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/sysinfo.h"
+
+// Заводим и заполняем переменную
+struct info_t device_card = {
+    .revision = 2,
+    .version = 0x00010000,
+    .name = "es-cmd-usb"
+};
 
 void device_info(void)
 {
@@ -35,4 +44,41 @@ void device_info(void)
     printf("chip: manufacturer 0x%03x, part 0x%04x, revision %u\n",
            manufacturer, part, revision);
     printf("pico-sdk: %s\n", PICO_SDK_VERSION_STRING);
+}
+
+void dev_info(void)
+{
+    // Шапка таблицы
+    printf("%-15s %-10s %-5s %-6s %s\n", "struct", "address", "size", "offset", "value");
+
+    // Строка самой структуры
+    printf("%-15s 0x%08x %-5u\n", "device_card", (unsigned)&device_card, (unsigned)sizeof(device_card));
+
+    // Поля структуры (для revision)
+    printf("- %-13s 0x%08x %-5u %-6u %u\n", 
+           "revision", 
+           (unsigned)&device_card.revision, 
+           (unsigned)sizeof(device_card.revision), 
+           (unsigned)offsetof(struct info_t, revision), 
+           device_card.revision);
+
+    // Поля структуры (для version)
+    printf("- %-13s 0x%08x %-5u %-6u 0x%08x\n", 
+           "version", 
+           (unsigned)&device_card.version, 
+           (unsigned)sizeof(device_card.version), 
+           (unsigned)offsetof(struct info_t, version), 
+           device_card.version);
+
+    // Поля структуры (для name) - здесь & не нужен, так как массив это уже адрес
+    printf("- %-13s 0x%08x %-5u %-6u %s\n", 
+           "name", 
+           (unsigned)device_card.name, 
+           (unsigned)sizeof(device_card.name), 
+           (unsigned)offsetof(struct info_t, name), 
+           device_card.name);
+
+    // Итог
+    unsigned fields = sizeof(device_card.version) + sizeof(device_card.name) + sizeof(device_card.revision);
+    printf("fields %u, sizeof %u, padding %u\n", fields, (unsigned)sizeof(device_card), (unsigned)(sizeof(device_card) - fields));
 }
