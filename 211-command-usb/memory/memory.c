@@ -6,6 +6,8 @@
 #include <stdlib.h> // Для malloc и free
 #include "command.h"
 #include "device.h"
+#include "hardware/gpio.h"
+#include "led.h"
 
 // Объявляем символы линкера
 extern char __flash_binary_start;
@@ -130,4 +132,32 @@ void mem_info(void)
     printf("  ram free      %u for heap and %u for stack\n", 
            (unsigned)((uintptr_t)&__HeapLimit - (uintptr_t)&__bss_end__), 
            (unsigned)((uintptr_t)&__StackTop - (uintptr_t)&__StackBottom));
+}
+void boot_info(void)
+{
+    // 1. Таблица векторов
+    #define VECTOR_TABLE 0x10000100
+    const uint32_t *vectors = (const uint32_t *)VECTOR_TABLE;
+
+    uint32_t stack_top = vectors[0];
+    uint32_t reset_handler = vectors[1];
+    uint32_t reset_even = reset_handler & ~1u;
+
+    // 2. Регистр GPIO_IN (адрес 0xd0000004)
+    volatile uint32_t *gpio_in = (volatile uint32_t *)0xd0000004;
+    
+    // 3. Читаем нужный бит (сдвиг + маска)
+    uint32_t led_bit = (*gpio_in >> led_pin()) & 1u;
+
+    // 4. Значение через SDK (для сравнения)
+    uint32_t gpio_get_val = gpio_get(led_pin());
+
+    // 5. Печать
+    printf("vector table  0x%08x\n", (unsigned)VECTOR_TABLE);
+    printf("stack top     0x%08x\n", stack_top);
+    printf("reset         0x%08x\n", reset_handler);
+    printf("reset (even)  0x%08x\n", reset_even);
+    printf("gpio in       0x%08x\n", (unsigned)gpio_in);
+    printf("led bit       %u\n", led_bit);
+    printf("gpio_get      %u\n", gpio_get_val);
 }

@@ -28,3 +28,7 @@ bool led_is_on(void)
 {
     return led_state;
 }
+uint led_pin(void)
+{
+    return LED_PIN; // Или то имя константы, которое используется в вашем led.c
+}
