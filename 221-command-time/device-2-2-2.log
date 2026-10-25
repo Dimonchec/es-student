@@ -1,0 +1,63 @@
+задание: 2.2.2
+проект: 221-command-time
+устройство: 2e8a:000a
+серийный номер: 53032847491E7A9C
+порт: COM11
+начало: 2026-10-25T19:37:25
+   0.000 --> uptime
+   0.000 <-- uptime
+   0.000 <-- dbg read_line:133 got uptime
+   0.000 <-- uptime: 31053 ms
+   0.406 --> boot_info
+   0.406 <-- boot_info
+   0.406 <-- dbg read_line:133 got boot_info
+   0.406 <-- vector table  0x10000100
+   0.406 <-- stack top     0x20042000
+   0.406 <-- reset         0x100001f7
+   0.406 <-- reset (even)  0x100001f6
+   0.406 <-- gpio in       0xd0000004
+   0.406 <-- led bit       0
+   0.406 <-- gpio_get      0
+   0.813 --> uptime
+   0.813 <-- uptime
+   0.813 <-- dbg read_line:133 got uptime
+   0.813 <-- uptime: 31875 ms
+   1.234 --> boot_info
+   1.234 <-- boot_info
+   1.234 <-- dbg read_line:133 got boot_info
+   1.234 <-- vector table  0x10000100
+   1.234 <-- stack top     0x20042000
+   1.234 <-- reset         0x100001f7
+   1.234 <-- reset (even)  0x100001f6
+   1.234 <-- gpio in       0xd0000004
+   1.234 <-- led bit       0
+   1.234 <-- gpio_get      0
+   1.641 --> uptime
+   1.641 <-- uptime
+   1.641 <-- dbg read_line:133 got uptime
+   1.641 <-- uptime: 32701 ms
+   2.063 --> boot_info
+   2.063 <-- boot_info
+   2.063 <-- dbg read_line:133 got boot_info
+   2.063 <-- vector table  0x10000100
+   2.063 <-- stack top     0x20042000
+   2.063 <-- reset         0x100001f7
+   2.063 <-- reset (even)  0x100001f6
+   2.063 <-- gpio in       0xd0000004
+   2.063 <-- led bit       0
+   2.063 <-- gpio_get      0
+   2.469 --> uptime
+   2.469 <-- uptime
+   2.469 <-- dbg read_line:133 got uptime
+   2.469 <-- uptime: 33524 ms
+   2.875 --> boot_info
+   2.875 <-- boot_info
+   2.875 <-- dbg read_line:133 got boot_info
+   2.875 <-- vector table  0x10000100
+   2.875 <-- stack top     0x20042000
+   2.875 <-- reset         0x100001f7
+   2.875 <-- reset (even)  0x100001f6
+   2.875 <-- gpio in       0xd0000004
+   2.875 <-- led bit       1
+   2.875 <-- gpio_get      1
+итог: отправлено команд 8, принято строк 48

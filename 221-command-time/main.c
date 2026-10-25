@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h> // <--- ДОБАВЛЕНО: для функции strcmp
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
 #include "led.h"
 #include "log.h"
 #include "device.h"
@@ -12,11 +11,25 @@
 
 #define LINE_SIZE 32
 
+const uint BLINK_HALF_PERIOD_MS = 500;
+uint64_t last_toggle_us = 0;
+
+void blink(void)
+{
+    uint64_t now_us = time_us_64();
+
+    // Если прошло больше 500 мс (500 * 1000 микросекунд)
+    if (now_us - last_toggle_us >= BLINK_HALF_PERIOD_MS * 1000)
+    {
+        last_toggle_us = now_us; // Запоминаем время переключения
+        led_toggle();            // Переключаем светодиод
+    }
+}
+
 char line[LINE_SIZE];
 uint line_length = 0;   
 
-const uint BUTTON_PIN = 15;
-const uint DEBOUNCE_MS = 20;
+
 
 // 1. Тип для указателя на функцию-обработчик (принимает void, возвращает void)
 /*typedef void (*command_handler_t)(void);
@@ -32,18 +45,7 @@ struct command_t
 // --- ДОБАВЛЕНО: Прототип функции, чтобы read_line знала о её существовании ---
 void handle_command(const char *command);
 
-// 2. Выносим действия команд в отдельные функции
-void cmd_enable(void)
-{
-    led_set(true);
-    LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-}
 
-void cmd_disable(void)
-{
-    led_set(false);
-    LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-}
 
 void cmd_info(void)
 {
@@ -84,11 +86,13 @@ void cmd_clk_info(void)
 {
     clk_info();
 }
+void cmd_uptime(void)
+{
+    uptime();
+}
 
 // 3. Собираем таблицу команд
 const struct command_t commands[] = {
-    { "enable",  cmd_enable  },
-    { "disable", cmd_disable },
     { "info",    cmd_info    },
     { "version", cmd_version },
     { "ping",    cmd_ping    },
@@ -97,6 +101,7 @@ const struct command_t commands[] = {
     { "dev_info", cmd_dev_info },
     { "boot_info", cmd_boot_info },
     { "clk_info", cmd_clk_info },
+    { "uptime", cmd_uptime },
 };
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
@@ -106,12 +111,7 @@ const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
 // ------------------------------------------------------------------------------
 
-bool get_button_debounce(uint pin)
-{
-    bool state = gpio_get(pin);
-    sleep_ms(DEBOUNCE_MS);
-    return state && gpio_get(pin);
-}
+
 
 void read_line(void)
 {
@@ -173,24 +173,11 @@ int main()
     stdio_init_all();
     led_init();
 
-    gpio_init(BUTTON_PIN);
-    gpio_set_dir(BUTTON_PIN, GPIO_IN);
-    gpio_pull_up(BUTTON_PIN);
-
-    bool previous = false;
-
     while (1)
     {
-        // 1. Обработка физической кнопки
-        bool current = get_button_debounce(BUTTON_PIN);
-        if (previous == true && current == false)
-        {
-            led_toggle();
-            LOG_INF("led %s\n", led_is_on() ? "on" : "off");
-        }
-        previous = current;
-
-        // 2. Обработка ввода с терминала
-        read_line();
+        blink();    // Проверяем, не пора ли переключить светодиод
+        read_line(); // Читаем команды из терминала
     }
+
+    
 }

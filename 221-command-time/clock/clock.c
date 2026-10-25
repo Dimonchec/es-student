@@ -28,3 +28,9 @@ void clk_info(void)
     // Используем %s для строки, а для числа оставляем %u.
     printf("%-8s %9s %12u\n", "rosc", "-", (unsigned)frequency_count_khz(CLOCKS_FC0_SRC_VALUE_ROSC_CLKSRC));
 }
+void uptime(void)
+{
+    // time_us_64() возвращает uint64_t (микросекунды).
+    // Делим на 1000, чтобы получить миллисекунды.
+    printf("uptime: %llu ms\n", time_us_64() / 1000);
+}
