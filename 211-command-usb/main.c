@@ -83,8 +83,7 @@ const struct command_t commands[] = {
 
 const uint command_count = sizeof(commands) / sizeof(commands[0]);
 
-// Вычисляем количество команд в массиве
-//*#define COMMAND_COUNT (sizeof(commands) / sizeof(commands[0]))
+
 
 
 // ------------------------------------------------------------------------------
