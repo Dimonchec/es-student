@@ -52,7 +52,7 @@ void fw_info(void)
     printf("%-20s 0x%08x 0x%04x\n", "main", (unsigned)main, *main_code);
     
     // fw_info: свой адрес (с признаком Thumb)
-    printf("%-20s 0x%08x\n", "fw_info", (unsigned)fw_info);
+    printf("%-20s 0x%08x\n", "fw_info", (unsigned)((uintptr_t)fw_info & ~1u));
     
     // commands: адрес массива
     printf("%-20s 0x%08x\n", "commands", (unsigned)commands);
