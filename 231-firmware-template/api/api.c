@@ -11,7 +11,7 @@ double calc_pi(uint terms);
 
 typedef struct {
     const char *name;
-    void (*handler)(const command_t *cmd);
+    void (*callback)(const command_t *cmd);
     const char *help;
 } api_command_t;
 
@@ -52,9 +52,9 @@ void api_handle(const command_t *command)
     {
         if (strcmp(command->name, api_commands[i].name) == 0)
         {
-            if (api_commands[i].handler != NULL)
+            if (api_commands[i].callback != NULL)
             {
-                api_commands[i].handler(command);
+                api_commands[i].callback(command);
             }
             return;
         }
