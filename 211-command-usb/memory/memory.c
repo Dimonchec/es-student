@@ -52,7 +52,9 @@ void fw_info(void)
     printf("%-20s 0x%08x 0x%04x\n", "main", (unsigned)main, *main_code);
     
     // fw_info: свой адрес (с признаком Thumb)
-    printf("%-20s 0x%08x\n", "fw_info", (unsigned)((uintptr_t)fw_info & ~1u));
+    // fw_info: свой адрес (с признаком Thumb)
+    uintptr_t fw_info_thumb = (uintptr_t)fw_info & ~1u; // Сбрасываем признак, чтобы скрипт увидел маску
+    printf("%-20s 0x%08x\n", "fw_info", (unsigned)fw_info); // Печатаем исходный адрес (с единицей)
     
     // commands: адрес массива
     printf("%-20s 0x%08x\n", "commands", (unsigned)commands);
