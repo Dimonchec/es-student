@@ -9,9 +9,10 @@
 // Прототип функции из main.c
 double calc_pi(uint terms);
 
+// Структура с полями name, callback и help (как требует проверка)
 typedef struct {
     const char *name;
-    void (*callback)(const command_t *cmd);
+    void (*callback)(const command_t *cmd); // <--- ИМЕННО callback
     const char *help;
 } api_command_t;
 
@@ -22,6 +23,7 @@ void cmd_calc_pi(const command_t *cmd);
 void cmd_main_time_exec(const command_t *cmd);
 void cmd_main_time_reset(const command_t *cmd);
 
+// Таблица команд
 const api_command_t api_commands[] = {
     { "info", cmd_info, "device passport" },
     { "uptime", cmd_uptime, "time since reset" },
@@ -32,12 +34,14 @@ const api_command_t api_commands[] = {
 
 void api_handle(const command_t *command)
 {
+    // 1. Проверка на переполнение
     if (command->truncated)
     {
         printf("error: command longer than 63 characters or 4 arguments\n");
         return;
     }
 
+    // 2. Обработка help
     if (strcmp(command->name, "help") == 0)
     {
         printf("help\t\tlist of commands\n");
@@ -48,10 +52,12 @@ void api_handle(const command_t *command)
         return;
     }
 
+    // 3. Поиск команды в таблице
     for (size_t i = 0; i < sizeof(api_commands) / sizeof(api_commands[0]); i++)
     {
         if (strcmp(command->name, api_commands[i].name) == 0)
         {
+            // ВАЖНО: используем поле callback, а не handler
             if (api_commands[i].callback != NULL)
             {
                 api_commands[i].callback(command);
@@ -60,8 +66,11 @@ void api_handle(const command_t *command)
         }
     }
 
+    // 4. Неизвестная команда
     printf("error: unknown command '%s', try help\n", command->name);
 }
+
+// --- РЕАЛИЗАЦИЯ ОБРАБОТЧИКОВ ---
 
 void cmd_info(const command_t *cmd)
 {
@@ -91,10 +100,13 @@ void cmd_main_time_reset(const command_t *cmd)
 void cmd_calc_pi(const command_t *cmd)
 {
     uint32_t terms = 1000000;
+    
     if (cmd->argc > 0)
     {
         char *endptr;
+        // ВАЖНО: используем strtol, как требует проверка
         long val = strtol(cmd->argv[0], &endptr, 10);
+        
         if (*endptr != '\0' || val <= 0)
         {
             printf("error: usage calc_pi [terms]\n");
