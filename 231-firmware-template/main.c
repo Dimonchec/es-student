@@ -5,8 +5,7 @@
 #include "api.h"
 #include "stdio-text-protocol.h"
 
-// Прототип функции, которая используется в api.c
-double calc_pi(uint terms);
+double calc_pi(uint terms); // Прототип для api.c
 
 const uint BLINK_HALF_PERIOD_MS = 500;
 uint64_t last_toggle_us = 0;
