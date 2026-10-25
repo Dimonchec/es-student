@@ -2,6 +2,39 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/clocks.h"
+#include "log.h" 
+
+// Константа пониженной частоты
+const uint32_t CLK_SYS_LOW_KHZ = 62500;
+
+// Статическая функция установки частоты
+static void clk_sys_set(uint32_t khz)
+{
+    if (set_sys_clock_khz(khz, false))
+    {
+        LOG_INF("clk_sys %u kHz\n", (unsigned)khz);
+    }
+    else
+    {
+        LOG_ERR("clk_sys %u kHz is not set\n", (unsigned)khz);
+    }
+}
+
+// Функции для смены частоты
+void clk_sys_low(void)
+{
+    clk_sys_set(CLK_SYS_LOW_KHZ);
+}
+
+void clk_sys_default(void)
+{
+    clk_sys_set(SYS_CLK_KHZ); // SYS_CLK_KHZ - макрос из SDK (125000)
+}
+
+// ВАЖНО: Добавьте этот комментарий над функцией clk_sys_set (как требует задание)
+// set_sys_clock_khz() вызывает set_sys_clock_pll(), а та переводит clk_peri
+// на PLL для USB, 48 МГц. Так настроено по умолчанию:
+// PICO_CLOCK_ADJUST_PERI_CLOCK_WITH_SYS_CLOCK равен 0.
 
 // Вспомогательная функция для печати строки таблицы
 static void row(const char *name, uint32_t set_khz, uint32_t measured_khz)
