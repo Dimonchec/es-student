@@ -11,6 +11,31 @@ void stdio_text_protocol_init(void)
     length = 0;
 }
 
+// Разбивает строку на слова на месте, возвращает количество слов
+static uint32_t split_words(uint32_t len)
+{
+    uint32_t words = 0;
+    bool in_word = false;
+
+    for (uint32_t i = 0; i <= len; i++)
+    {
+        if (buffer[i] == ' ' || buffer[i] == '\0')
+        {
+            if (in_word)
+            {
+                buffer[i] = '\0';
+                in_word = false;
+            }
+        }
+        else if (!in_word)
+        {
+            in_word = true;
+            words++;
+        }
+    }
+    return words;
+}
+
 const command_t *stdio_text_protocol_handle(void)
 {
     int symbol = getchar_timeout_us(0);
@@ -20,6 +45,7 @@ const command_t *stdio_text_protocol_handle(void)
         return NULL;
     }
 
+    // Backspace (0x08 или 0x7f): убираем последний символ и стираем его на экране
     if (symbol == 0x08 || symbol == 0x7f)
     {
         if (length > 0)
@@ -30,6 +56,7 @@ const command_t *stdio_text_protocol_handle(void)
         return NULL;
     }
 
+    // Конец строки (CR или LF)
     if (symbol == '\r' || symbol == '\n')
     {
         printf("\n");
@@ -38,47 +65,49 @@ const command_t *stdio_text_protocol_handle(void)
         if (length == 0)
         {
             length = 0;
+            return NULL; // Пустой кадр игнорируется
+        }
+
+        // Сбрасываем флаг для новой строки
+        current_command.truncated = false;
+
+        // Считаем слова
+        uint32_t words = split_words(length);
+
+        if (words == 0)
+        {
+            length = 0;
             return NULL;
         }
 
-        current_command.truncated = false;
-        current_command.argc = 0;
-        int arg_idx = 0;
-        bool in_word = false;
+        // Заполняем структуру
+        current_command.name = &buffer[0];
+        current_command.argc = (words > 1) ? (words - 1) : 0;
 
+        // Восстанавливаем указатели на аргументы
+        uint32_t word_idx = 0;
+        bool in_word = false;
         for (uint32_t i = 0; i <= length; i++)
         {
-            if (buffer[i] == ' ' || buffer[i] == '\0')
+            if (buffer[i] != '\0')
             {
-                if (in_word)
+                if (!in_word)
                 {
-                    buffer[i] = '\0';
-                    in_word = false;
+                    in_word = true;
+                    if (word_idx > 0 && (word_idx - 1) < STDIO_TEXT_PROTOCOL_MAX_ARGS)
+                    {
+                        current_command.argv[word_idx - 1] = &buffer[i];
+                    }
+                    word_idx++;
                 }
             }
-            else if (!in_word)
+            else
             {
-                in_word = true;
-                if (arg_idx == 0)
-                {
-                    current_command.name = &buffer[i];
-                }
-                else
-                {
-                    if (arg_idx - 1 < STDIO_TEXT_PROTOCOL_MAX_ARGS)
-                    {
-                        current_command.argv[arg_idx - 1] = &buffer[i];
-                    }
-                    else
-                    {
-                        current_command.truncated = true;
-                    }
-                }
-                arg_idx++;
+                in_word = false;
             }
         }
-        current_command.argc = (arg_idx > 0) ? (arg_idx - 1) : 0;
 
+        // Проверка на переполнение аргументов
         if (current_command.argc > STDIO_TEXT_PROTOCOL_MAX_ARGS)
         {
             current_command.truncated = true;
@@ -88,13 +117,15 @@ const command_t *stdio_text_protocol_handle(void)
         return &current_command;
     }
 
+    // Обычный символ
     if (length + 1 < STDIO_TEXT_PROTOCOL_LINE_SIZE)
     {
         buffer[length++] = (char)symbol;
-        putchar(symbol);
+        putchar(symbol); // Эхо
     }
     else
     {
+        // Буфер переполнен — помечаем как truncated
         current_command.truncated = true;
     }
 

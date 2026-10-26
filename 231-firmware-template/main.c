@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "led.h"
-#include "profiling.h"
 #include "api.h"
 #include "stdio-text-protocol.h"
 
-double calc_pi(uint terms); // Прототип для api.c
+// Прототип функции для api.c
+double calc_pi(uint terms);
 
 const uint BLINK_HALF_PERIOD_MS = 500;
 uint64_t last_toggle_us = 0;
@@ -36,12 +36,10 @@ int main()
 {
     stdio_init_all();
     led_init();
-    profiling_init();
     stdio_text_protocol_init();
 
     while (1)
     {
-        profiling_iteration();
         blink();
 
         const command_t *command = stdio_text_protocol_handle();

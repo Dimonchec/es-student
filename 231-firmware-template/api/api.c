@@ -5,31 +5,46 @@
 #include "pico/stdlib.h"
 #include "device.h"
 #include "profiling.h"
+#include "led.h"
 
 // Прототип функции из main.c
 double calc_pi(uint terms);
 
-// Структура с полями name, callback и help (как требует проверка)
+// Структура таблицы API с полями name, help и callback
 typedef struct {
     const char *name;
-    void (*callback)(const command_t *cmd); // <--- ИМЕННО callback
+    void (*callback)(const command_t *cmd);
     const char *help;
 } api_command_t;
 
 // Прототипы обработчиков
+void cmd_help(const command_t *cmd);
 void cmd_info(const command_t *cmd);
 void cmd_uptime(const command_t *cmd);
-void cmd_calc_pi(const command_t *cmd);
-void cmd_main_time_exec(const command_t *cmd);
-void cmd_main_time_reset(const command_t *cmd);
+void cmd_led_enable(const command_t *cmd);
+void cmd_led_disable(const command_t *cmd);
+void cmd_led_blink(const command_t *cmd);
+void cmd_led_period(const command_t *cmd);
+void cmd_button(const command_t *cmd);
+void cmd_pi_start(const command_t *cmd);
+void cmd_pi(const command_t *cmd);
+void cmd_profiling(const command_t *cmd);
+void cmd_profiling_reset(const command_t *cmd);
 
 // Таблица команд
 const api_command_t api_commands[] = {
-    { "info", cmd_info, "device passport" },
-    { "uptime", cmd_uptime, "time since reset" },
-    { "calc_pi", cmd_calc_pi, "calculate pi: calc_pi [terms]" },
-    { "main_time_exec", cmd_main_time_exec, "superloop iteration: average and maximum" },
-    { "main_time_reset", cmd_main_time_reset, "reset maximum iteration" },
+    { "help",           cmd_help,           "list of commands" },
+    { "info",           cmd_info,           "device passport" },
+    { "uptime",         cmd_uptime,         "time since reset" },
+    { "led_enable",     cmd_led_enable,     "turn LED on" },
+    { "led_disable",    cmd_led_disable,    "turn LED off" },
+    { "led_blink",      cmd_led_blink,      "start blinking" },
+    { "led_period",     cmd_led_period,     "set blink period in ms: led_period <ms>" },
+    { "button",         cmd_button,         "button state and press count" },
+    { "pi_start",       cmd_pi_start,       "start pi calculation: pi_start [terms]" },
+    { "pi",             cmd_pi,             "get last pi result" },
+    { "profiling",      cmd_profiling,      "show profiling stats" },
+    { "profiling_reset",cmd_profiling_reset,"reset profiling stats" },
 };
 
 void api_handle(const command_t *command)
@@ -52,12 +67,11 @@ void api_handle(const command_t *command)
         return;
     }
 
-    // 3. Поиск команды в таблице
+    // 3. Поиск команды
     for (size_t i = 0; i < sizeof(api_commands) / sizeof(api_commands[0]); i++)
     {
         if (strcmp(command->name, api_commands[i].name) == 0)
         {
-            // ВАЖНО: используем поле callback, а не handler
             if (api_commands[i].callback != NULL)
             {
                 api_commands[i].callback(command);
@@ -70,7 +84,12 @@ void api_handle(const command_t *command)
     printf("error: unknown command '%s', try help\n", command->name);
 }
 
-// --- РЕАЛИЗАЦИЯ ОБРАБОТЧИКОВ ---
+// --- Реализация обработчиков ---
+
+void cmd_help(const command_t *cmd)
+{
+    (void)cmd; // help обрабатывается в api_handle
+}
 
 void cmd_info(const command_t *cmd)
 {
@@ -84,41 +103,12 @@ void cmd_uptime(const command_t *cmd)
     printf("uptime: %llu ms\n", time_us_64() / 1000);
 }
 
-void cmd_main_time_exec(const command_t *cmd)
-{
-    (void)cmd;
-    printf("iteration avg %.2f us, max %u us\n", profiling_avg_us(), (unsigned)profiling_max_us());
-}
-
-void cmd_main_time_reset(const command_t *cmd)
-{
-    (void)cmd;
-    profiling_reset_max();
-    printf("max reset\n");
-}
-
-void cmd_calc_pi(const command_t *cmd)
-{
-    uint32_t terms = 1000000;
-    
-    if (cmd->argc > 0)
-    {
-        char *endptr;
-        // ВАЖНО: используем strtol, как требует проверка
-        long val = strtol(cmd->argv[0], &endptr, 10);
-        
-        if (*endptr != '\0' || val <= 0)
-        {
-            printf("error: usage calc_pi [terms]\n");
-            return;
-        }
-        terms = (uint32_t)val;
-    }
-
-    uint64_t start = time_us_64();
-    volatile double pi = calc_pi(terms);
-    uint64_t spent = time_us_64() - start;
-
-    printf("pi: %.9f\n", pi);
-    printf("time: %llu ms\n", spent / 1000);
-}
+void cmd_led_enable(const command_t *cmd) { (void)cmd; led_set(true); }
+void cmd_led_disable(const command_t *cmd) { (void)cmd; led_set(false); }
+void cmd_led_blink(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.2 */ }
+void cmd_led_period(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.2 */ }
+void cmd_button(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.3 */ }
+void cmd_pi_start(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.4 */ }
+void cmd_pi(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.4 */ }
+void cmd_profiling(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.5 */ }
+void cmd_profiling_reset(const command_t *cmd) { (void)cmd; /* заглушка на этап 2.3.5 */ }
