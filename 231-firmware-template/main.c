@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "led.h"
 #include "api.h"
 #include "stdio-text-protocol.h"
 #include "led-task.h"
+#include "button-task.h" // <--- НОВЫЙ ИНКЛЮД
 
-// Прототип функции для api.c
 double calc_pi(uint terms);
-
 
 double calc_pi(uint terms)
 {
@@ -24,13 +22,15 @@ double calc_pi(uint terms)
 int main()
 {
     stdio_init_all();
-     led_task_init();
+    led_task_init();
+    button_task_init(); // <--- НОВЫЙ ВЫЗОВ
     stdio_text_protocol_init();
 
     while (1)
     {
         led_task_handle();
-        
+        button_task_handle(); // <--- НОВЫЙ ВЫЗОВ
+
         const command_t *command = stdio_text_protocol_handle();
         if (command != NULL)
         {

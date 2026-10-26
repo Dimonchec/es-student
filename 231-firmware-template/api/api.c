@@ -8,6 +8,7 @@
 #include "device.h"
 #include "profiling.h"
 #include "led-task.h"
+#include "button-task.h"
 
 // Прототип функции из main.c
 double calc_pi(uint terms);
@@ -88,6 +89,7 @@ const api_command_t api_commands[] = {
     { "pi",             "get last pi result",                      cmd_pi },
     { "profiling",      "show profiling stats",                    cmd_profiling },
     { "profiling_reset","reset profiling stats",                   cmd_profiling_reset },
+    { "button", "button state and press count", cmd_button },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
@@ -174,7 +176,7 @@ static void cmd_led_period(const command_t *cmd)
 }
 
 // Заглушки для будущих задач
-static void cmd_button(const command_t *cmd) { (void)cmd; }
+
 static void cmd_pi(const command_t *cmd) { (void)cmd; }
 static void cmd_profiling(const command_t *cmd) { (void)cmd; }
 static void cmd_profiling_reset(const command_t *cmd) { (void)cmd; }
@@ -201,4 +203,12 @@ static void cmd_pi_start(const command_t *cmd)
 
     printf("pi: %.9f\n", pi);
     printf("time: %llu ms\n", spent / 1000);
+}
+
+static void cmd_button(const command_t *cmd)
+{
+    (void)cmd;
+    bool pressed = button_task_is_pressed();
+    uint32_t count = button_task_get_press_count();
+    printf("button: %s, presses %u\n", pressed ? "pressed" : "released", (unsigned)count);
 }
