@@ -5,7 +5,6 @@
 #include "led-task.h"
 
 double calc_pi(uint terms);
-
 double calc_pi(uint terms)
 {
     double sum = 0.0, sign = 1.0;
