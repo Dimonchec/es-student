@@ -7,7 +7,7 @@
 #include "pico/stdlib.h"
 #include "device.h"
 #include "profiling.h"
-#include "led.h"
+#include "led-task.h"
 
 // Прототип функции из main.c
 double calc_pi(uint terms);
@@ -44,6 +44,20 @@ static bool parse_u32(const char *text, uint32_t *value)
 
     *value = (uint32_t)number;
     return true;
+}
+
+// Вспомогательная функция для печати состояния светодиода
+static void print_led_state(void)
+{
+    led_state_t state = led_task_get_state();
+    uint32_t period = led_task_get_period_ms();
+    const char *state_name = "";
+
+    if (state == LED_STATE_OFF) state_name = "off";
+    else if (state == LED_STATE_ON) state_name = "on";
+    else if (state == LED_STATE_BLINK) state_name = "blink";
+
+    printf("led: %s, period %u ms\n", state_name, (unsigned)period);
 }
 
 // Прототипы обработчиков
@@ -99,7 +113,7 @@ void api_handle(const command_t *command)
         return;
     }
 
-    // 3. Поиск команды (цикл, который ищет проверка)
+    // 3. Поиск команды
     for (uint32_t i = 0; i < api_command_count; i++)
     {
         if (strcmp(command->name, api_commands[i].name) == 0)
@@ -119,36 +133,56 @@ static void cmd_help(const command_t *cmd) { (void)cmd; }
 static void cmd_info(const command_t *cmd) { (void)cmd; device_info(); }
 static void cmd_uptime(const command_t *cmd) { (void)cmd; printf("uptime: %llu ms\n", time_us_64() / 1000); }
 
-static void cmd_led_enable(const command_t *cmd) { (void)cmd; led_set(true); }
-static void cmd_led_disable(const command_t *cmd) { (void)cmd; led_set(false); }
+// Команды светодиода
+static void cmd_led_enable(const command_t *cmd)
+{
+    (void)cmd;
+    led_task_set_state(LED_STATE_ON);
+    print_led_state();
+}
 
-static void cmd_led_blink(const command_t *cmd) { (void)cmd; }
-static void cmd_button(const command_t *cmd) { (void)cmd; }
-static void cmd_pi(const command_t *cmd) { (void)cmd; }
-static void cmd_profiling(const command_t *cmd) { (void)cmd; }
-static void cmd_profiling_reset(const command_t *cmd) { (void)cmd; }
+static void cmd_led_disable(const command_t *cmd)
+{
+    (void)cmd;
+    led_task_set_state(LED_STATE_OFF);
+    print_led_state();
+}
 
-// Обработчик led_period (как на скриншоте)
+static void cmd_led_blink(const command_t *cmd)
+{
+    (void)cmd;
+    led_task_set_state(LED_STATE_BLINK);
+    print_led_state();
+}
+
 static void cmd_led_period(const command_t *cmd)
 {
     uint32_t period_ms;
-
     if (cmd->argc != 1 || !parse_u32(cmd->argv[0], &period_ms))
     {
         printf("error: usage led_period <period_ms>\n");
         return;
     }
 
-    // TODO: здесь будет проверка периода на этапе 2.3.2
-    // if (!led_task_set_period_ms(period_ms)) { ... }
+    if (!led_task_set_period_ms(period_ms))
+    {
+        printf("error: period_ms must be greater than 0\n");
+        return;
+    }
+
+    print_led_state();
 }
 
-// Обработчик pi_start (вызов strtol и вывод pi)
+// Заглушки для будущих задач
+static void cmd_button(const command_t *cmd) { (void)cmd; }
+static void cmd_pi(const command_t *cmd) { (void)cmd; }
+static void cmd_profiling(const command_t *cmd) { (void)cmd; }
+static void cmd_profiling_reset(const command_t *cmd) { (void)cmd; }
+
+// Запуск расчета пи (с аргументом)
 static void cmd_pi_start(const command_t *cmd)
 {
     uint32_t terms = 1000000;
-    
-    // Скрипт ищет вызов strtol в коде
     if (cmd->argc > 0)
     {
         char *endptr;

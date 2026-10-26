@@ -7,7 +7,7 @@
 
 void device_info(void)
 {
-    // 1. Выводим данные о проекте и версии (как требует задание)
+    // 1. Выводим данные о проекте и версии
     printf("project: %s\n", DEVICE_PROJECT);
     printf("version: %s\n", FIRMWARE_VERSION);
 
@@ -24,10 +24,11 @@ void device_info(void)
     uint32_t revision = (id & SYSINFO_CHIP_ID_REVISION_BITS) >> SYSINFO_CHIP_ID_REVISION_LSB;
 
     // 4. Печатаем остальной паспорт
+    // ВАЖНО: добавлено (unsigned) для устранения предупреждения -Wall
     printf("repo: %s\n", DEVICE_REPO);
     printf("board: %s\n", DEVICE_BOARD);
     printf("serial: %s\n", board_id);
     printf("chip: manufacturer 0x%03x, part 0x%04x, revision %u\n",
-           manufacturer, part, revision);
+           (unsigned)manufacturer, (unsigned)part, (unsigned)revision);
     printf("pico-sdk: %s\n", PICO_SDK_VERSION_STRING);
 }
