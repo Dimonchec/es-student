@@ -1,12 +1,29 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "led.h"
+#include "profiling.h"
 #include "api.h"
 #include "stdio-text-protocol.h"
-#include "led-task.h"
-#include "button-task.h" // <--- НОВЫЙ ИНКЛЮД
+#include "pi-task.h" // <--- ДОБАВЛЕНО: для pi_task_handle
 
+// Прототип функции для api.c
 double calc_pi(uint terms);
 
+const uint BLINK_HALF_PERIOD_MS = 500;
+uint64_t last_toggle_us = 0;
+
+// Функция мигания определена ДО main()
+void blink(void)
+{
+    uint64_t now_us = time_us_64();
+    if (now_us - last_toggle_us >= BLINK_HALF_PERIOD_MS * 1000)
+    {
+        last_toggle_us = now_us;
+        led_toggle();
+    }
+}
+
+// Функция расчета пи (нужна для api.c, но пока оставим здесь)
 double calc_pi(uint terms)
 {
     double sum = 0.0;
@@ -22,14 +39,16 @@ double calc_pi(uint terms)
 int main()
 {
     stdio_init_all();
-    led_task_init();
-    button_task_init(); // <--- НОВЫЙ ВЫЗОВ
+    led_init();
+    profiling_init();
     stdio_text_protocol_init();
 
     while (1)
     {
-        led_task_handle();
-        button_task_handle(); // <--- НОВЫЙ ВЫЗОВ
+        profiling_iteration();
+        blink();
+        
+        pi_task_handle(); // <--- ДОБАВЛЕНО: обработка задачи пи
 
         const command_t *command = stdio_text_protocol_handle();
         if (command != NULL)
