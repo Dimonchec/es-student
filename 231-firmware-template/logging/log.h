@@ -4,7 +4,6 @@
 
 #define DEVICE_NAME "es-led-module"
 
-
 #define LOG_LEVEL_ERR 1
 #define LOG_LEVEL_INF 2
 #define LOG_LEVEL_DBG 3
@@ -12,10 +11,11 @@
 #ifndef LOG_LEVEL
 #define LOG_LEVEL LOG_LEVEL_DBG
 #endif
-// ... предварительные директивы и дефайны уровней из шага 2 ...
-void log_version(void);
+
+// --- ДОБАВИТЬ ПРОТОТИП ФУНКЦИИ ПЕРЕД МАКРОСАМИ ---
 void log_prefix(const char *level, const char *function, int line);
-// Макрос для уровня INFO (уже есть на скриншоте)
+
+// Макрос для уровня INFO
 #define LOG_INF(...)                     \
     do {                                 \
         if (LOG_LEVEL >= LOG_LEVEL_INF) { \
@@ -24,7 +24,7 @@ void log_prefix(const char *level, const char *function, int line);
         }                                \
     } while (0)
 
-// Макрос для уровня ERR (ошибка)
+// Макрос для уровня ERR
 #define LOG_ERR(...)                     \
     do {                                 \
         if (LOG_LEVEL >= LOG_LEVEL_ERR) { \
@@ -33,7 +33,7 @@ void log_prefix(const char *level, const char *function, int line);
         }                                \
     } while (0)
 
-// Макрос для уровня DBG (отладка)
+// Макрос для уровня DBG
 #define LOG_DBG(...)                     \
     do {                                 \
         if (LOG_LEVEL >= LOG_LEVEL_DBG) { \
