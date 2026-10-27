@@ -1,7 +1,6 @@
 #pragma once
-
 #include <stdbool.h>
-#include <stdint.h> // <--- ДОБАВИТЬ ВОТ ЭТУ СТРОКУ
+#include <stdint.h>
 
 void button_task_init(void);
 void button_task_handle(void);

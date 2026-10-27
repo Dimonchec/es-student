@@ -8,6 +8,7 @@
 #include "device.h"
 #include "profiling.h"
 #include "led-task.h"
+#include "button-task.h"
 
 double calc_pi(uint terms);
 
@@ -52,10 +53,18 @@ static void cmd_led_period(const command_t *cmd)
     if (!led_task_set_period_ms(p)) { printf("error: period_ms must be greater than 0\n"); return; }
     print_led_state();
 }
-static void cmd_button(const command_t *cmd) { (void)cmd; }
+
 static void cmd_pi(const command_t *cmd) { (void)cmd; }
 static void cmd_profiling(const command_t *cmd) { (void)cmd; }
 static void cmd_profiling_reset(const command_t *cmd) { (void)cmd; }
+
+static void cmd_button(const command_t *cmd)
+{
+    (void)cmd;
+    bool pressed = button_task_is_pressed();
+    uint32_t count = button_task_get_press_count();
+    printf("button: %s, presses %u\n", pressed ? "pressed" : "released", (unsigned)count);
+}
 
 static void cmd_pi_start(const command_t *cmd)
 {
