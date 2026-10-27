@@ -2,8 +2,6 @@
 
 #include <stdio.h>
 
-#define DEVICE_NAME "es-led-module"
-
 #define LOG_LEVEL_ERR 1
 #define LOG_LEVEL_INF 2
 #define LOG_LEVEL_DBG 3
@@ -12,7 +10,7 @@
 #define LOG_LEVEL LOG_LEVEL_DBG
 #endif
 
-// --- ДОБАВИТЬ ПРОТОТИП ФУНКЦИИ ПЕРЕД МАКРОСАМИ ---
+// Прототип функции
 void log_prefix(const char *level, const char *function, int line);
 
 // Макрос для уровня INFO
