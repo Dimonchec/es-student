@@ -1,4 +1,4 @@
-#include "profiling.h"
+#include #include "profiling/profiling.h"
 #include "pico/stdlib.h"
 
 // Внутренняя структура для хранения состояния

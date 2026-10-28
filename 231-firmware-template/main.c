@@ -1,13 +1,19 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "api.h"
-#include "stdio-text-protocol.h"
-#include "led-task.h"
+
+// Библиотеки из libs/
+#include "profiling/profiling.h"
+#include "stdio-text-protocol/stdio-text-protocol.h"
+#include "systime/systime.h"
+#include "logging/log.h"
+#include "device/device.h"
+
+// Файлы проекта
+#include "firmware.h"
+#include "api.h"             // Если api.h лежит в корне проекта
+#include "led-task.h"        // Если лежат в корне
 #include "button-task.h"
 #include "pi-task.h"
-#include "profiling.h"
-#include "log.h"
-#include "device.h"
 
 // Перечисление для номеров секундомеров
 typedef enum {
@@ -34,7 +40,8 @@ int main()
     profiling_stopwatch_init(STOPWATCH_BUTTON, "button");
     profiling_stopwatch_init(STOPWATCH_PI, "pi");
 
-    LOG_INF("%s %s\n", DEVICE_NAME, FIRMWARE_VERSION);
+    // ИСПРАВЛЕНО: используем FIRMWARE_NAME из firmware.h
+    LOG_INF("%s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
 
     while (1)
     {

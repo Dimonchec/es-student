@@ -5,11 +5,13 @@
 #include <ctype.h>
 #include <errno.h>
 #include "pico/stdlib.h"
-#include "device.h"
-#include "profiling.h"
+#include "device/device.h"
+#include "profiling/profiling.h"
 #include "led-task.h"
 #include "button-task.h"
 #include "pi-task.h"
+#include "firmware.h"
+#include "systime/systime.h"
 
 // Тип обработчика
 typedef void (*api_callback_t)(const command_t *command);
@@ -114,7 +116,9 @@ static void cmd_info(const command_t *cmd)
 {
     (void)cmd;
     device_info_t info;
-    device_get_info(&info);
+    // Передаем 4 аргумента, как требует новая device_get_info
+    device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_VERSION, FIRMWARE_REPO);
+    
     printf("project: %s\n", info.project);
     printf("version: %s\n", info.version);
     printf("repo: %s\n", info.repo);
@@ -125,7 +129,11 @@ static void cmd_info(const command_t *cmd)
     printf("pico-sdk: %s\n", info.sdk_version);
 }
 
-static void cmd_uptime(const command_t *cmd) { (void)cmd; printf("uptime: %llu ms\n", time_us_64() / 1000); }
+static void cmd_uptime(const command_t *cmd) 
+{ 
+    (void)cmd; 
+    printf("uptime: %llu ms\n", systime_ms()); // <--- Заменили time_us_64() / 1000
+}
 
 static void cmd_led_enable(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_ON); print_led_state(); }
 static void cmd_led_disable(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_OFF); print_led_state(); }
