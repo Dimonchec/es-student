@@ -201,6 +201,7 @@ static void cmd_pi(const command_t *cmd)
 static void cmd_profiling(const command_t *cmd)
 {
     (void)cmd;
+#if PROFILING_ENABLED
     printf("profiling\n");
     for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) {
         profiling_result_t res;
@@ -209,6 +210,10 @@ static void cmd_profiling(const command_t *cmd)
                    res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
         }
     }
+#else
+    // <--- ДОБАВИТЬ ВОТ ЭТУ СТРОКУ
+    printf("profiling is disabled in this build\n");
+#endif
 }
 
 static void cmd_profiling_reset(const command_t *cmd)
