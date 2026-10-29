@@ -1,5 +1,5 @@
 #include "pi-task.h"
-#include "pico/stdlib.h"
+#include "systime/systime.h"
 
 // Константа за один вызов (как требует проверка)
 #define PI_TERMS_PER_CALL 1000

@@ -5,44 +5,47 @@ include(pico_sdk_import.cmake)
 project(231_firmware_template)
 pico_sdk_init()
 
-# 1. Подключаем libs (лежит уровнем выше)
+# libs лежит вне папки проекта
 add_subdirectory(../libs ${CMAKE_BINARY_DIR}/libs)
 
-# 2. Предупреждения
 add_compile_options(-Wall)
 
-# 3. Только файлы проекта (без исходников библиотек!)
-add_executable(${PROJECT_NAME}
-    main.c
-    api/api.c
-    led/led.c	                         # <--- Указываем путь к папке api
-    led-task/led-task.c               # <--- Указываем путь
-    button-task/button-task.c         # <--- Указываем путь
-    pi-task/pi-task.c                 # <--- Указываем путь
+# 1. Платформа (работа с SDK)
+add_library(platform STATIC
+    platform/platform.c
+)
+target_include_directories(platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(platform PRIVATE pico_stdlib)
+
+# 2. Логика (без SDK)
+add_library(logic STATIC
+    logic/api/api.c
+    logic/api/api-callbacks.c
+    logic/led-task/led-task.c
+    logic/button-task/button-task.c
+    logic/pi-task/pi-task.c
+)
+target_include_directories(logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/logic ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Подключаем протокол как PUBLIC, остальные библиотеки как PRIVATE
+target_link_libraries(logic 
+    PUBLIC stdio_text_protocol 
+    PRIVATE systime logging profiling device
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/led
-    ${CMAKE_CURRENT_SOURCE_DIR}/api
-    ${CMAKE_CURRENT_SOURCE_DIR}/led-task
-    ${CMAKE_CURRENT_SOURCE_DIR}/button-task
-    ${CMAKE_CURRENT_SOURCE_DIR}/pi-task
+# 3. Главный исполняемый файл
+add_executable(${PROJECT_NAME} main.c)
+
+target_link_libraries(${PROJECT_NAME} 
+    pico_stdlib 
+    platform 
+    logic
+    profiling   # <--- ДОБАВИТЬ
+    logging     # <--- ДОБАВИТЬ (для LOG_INF)
+    systime     # <--- ДОБАВИТЬ (если main.c использует systime_us)
 )
 
-# 4. Линкуем библиотеки
-target_link_libraries(${PROJECT_NAME}
-    pico_stdlib
-    device
-    logging
-    profiling
-    systime
-    stdio_text_protocol
-)
-
-# 5. Выключатель профилирования
 target_compile_definitions(profiling PUBLIC PROFILING_ENABLED=1)
-
 target_compile_definitions(${PROJECT_NAME} PRIVATE DEVICE_BOARD="${PICO_BOARD}")
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)

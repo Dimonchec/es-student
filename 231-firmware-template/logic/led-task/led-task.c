@@ -1,32 +1,30 @@
-#include "led-task.h"
-#include "led.h"
-#include "pico/stdlib.h"
+#include "led-task/led-task.h"
+#include "platform/platform.h"
 #include "systime/systime.h"
 
 static led_state_t led_state = LED_STATE_BLINK;
 static uint32_t period_ms = 1000;
 static uint64_t last_toggle_us = 0;
+static bool led_is_on = false; // Локальное состояние для мигания
+
+void led_task_init(void) { led_task_set_state(LED_STATE_BLINK); }
 
 static bool period_elapsed(uint64_t *last_us, uint64_t period_us)
 {
-    uint64_t now_us = systime_us();
-    if (now_us - *last_us >= period_us) { *last_us += period_us; return true; }
+    uint64_t now = systime_us();
+    if (now - *last_us >= period_us) { *last_us += period_us; return true; }
     return false;
 }
 
-void led_task_init(void)
-{
-    led_init();
-    led_task_set_state(LED_STATE_BLINK);
-}
+
 
 void led_task_set_state(led_state_t state)
 {
     led_state = state;
     switch (led_state)
     {
-        case LED_STATE_OFF: led_set(false); break;
-        case LED_STATE_ON: led_set(true); break;
+        case LED_STATE_OFF: led_is_on = false; platform_led_set(false); break;
+        case LED_STATE_ON: led_is_on = true; platform_led_set(true); break;
         case LED_STATE_BLINK: last_toggle_us = systime_us() - (period_ms * 1000); break;
     }
 }
@@ -38,7 +36,11 @@ void led_task_handle(void)
         case LED_STATE_OFF:
         case LED_STATE_ON: break;
         case LED_STATE_BLINK:
-            if (period_elapsed(&last_toggle_us, period_ms * 1000)) led_toggle();
+            if (systime_us() - last_toggle_us >= period_ms * 1000) {
+                last_toggle_us += period_ms * 1000;
+                led_is_on = !led_is_on;
+                platform_led_set(led_is_on);
+            }
             break;
     }
 }
