@@ -14,6 +14,10 @@
 #include "button-task/button-task.h"
 #include "pi-task/pi-task.h"
 
+
+static void cmd_help(const command_t *cmd);
+static void cmd_help(const command_t *cmd) { (void)cmd; }
+
 // Вспомогательная функция для разбора числа (без знака)
 static bool parse_u32(const char *text, uint32_t *value)
 {
@@ -45,7 +49,7 @@ static void cmd_info(const command_t *cmd)
     device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_VERSION, FIRMWARE_REPO);
     
     printf("project: %s\n", info.project);
-    printf("version: %s\n", info.version); // <--- Должно быть здесь
+    printf("version: %s\n", info.version);
     printf("repo: %s\n", info.repo);
     printf("board: %s\n", info.board);
     printf("serial: %s\n", info.serial);
@@ -53,6 +57,7 @@ static void cmd_info(const command_t *cmd)
            (unsigned)info.manufacturer, (unsigned)info.part, (unsigned)info.revision);
     printf("pico-sdk: %s\n", info.sdk_version);
 }
+
 static void cmd_uptime(const command_t *cmd) 
 { 
     (void)cmd; 
@@ -135,7 +140,7 @@ static void cmd_pi(const command_t *cmd)
 {
     (void)cmd;
     if (pi_task_is_done()) 
-        printf("pi: %.9f in %u ms\n", pi_task_get_result(), pi_task_get_time_ms()); // <--- Добавьте время
+        printf("pi: %.9f in %u ms\n", pi_task_get_result(), (unsigned)pi_task_get_time_ms()); // <--- Добавьте время
     else if (pi_task_is_busy())
         printf("pi: running\n");
     else
@@ -148,12 +153,11 @@ static void cmd_profiling(const command_t *cmd)
 #if PROFILING_ENABLED
     printf("profiling\n");
     for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) {
-        profiling_result_t res;
-        if (profiling_get(i, &res)) {
-            printf("%-8s count %-7u mean %u us max %u us\n", 
-                   res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
-        }
+    profiling_result_t res;
+    if (profiling_get(i, &res)) {
+        printf("%-8s count %-7u mean %u us max %u us\n", res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
     }
+}
 #else
     printf("profiling is disabled in this build\n");
 #endif
@@ -169,6 +173,9 @@ static void cmd_profiling_reset(const command_t *cmd)
 // --- Таблица команд ---
 // Обратите внимание: команды "help" здесь нет!
 const api_command_t api_commands[] = {
+    { "help",           "list of commands",                        cmd_help },
+    { "info",           "device passport",                         cmd_info },
+    { "uptime",         "time since reset",                        cmd_uptime },
     { "led_enable",     "turn LED on",                             cmd_led_enable },
     { "led_disable",    "turn LED off",                            cmd_led_disable },
     { "led_blink",      "start blinking",                          cmd_led_blink },
@@ -178,8 +185,6 @@ const api_command_t api_commands[] = {
     { "pi",             "get last pi result",                      cmd_pi },
     { "profiling",      "show profiling stats",                    cmd_profiling },
     { "profiling_reset","reset profiling stats",                   cmd_profiling_reset },
-    { "info",           "device passport",                         cmd_info },
-    { "uptime",         "time since reset",                        cmd_uptime },
 };
 
 // Длина таблицы (используется в api.c)
