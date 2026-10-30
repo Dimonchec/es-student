@@ -9,11 +9,10 @@ void api_handle(const command_t *command)
     
     if (strcmp(command->name, "help") == 0) 
     {
-        printf("help\t\tlist of commands\n");
+        // Выводим все команды из таблицы (включая help), начиная с help
         for (uint32_t i = 0; i < api_command_count; i++) 
         {
-            // Выводим все команды (включая help, как требует скрипт)
-            printf("%-15s\t%s\n", api_commands[i].name, api_commands[i].help);
+            printf("%-15s %s\n", api_commands[i].name, api_commands[i].help);
         }
         return;
     }

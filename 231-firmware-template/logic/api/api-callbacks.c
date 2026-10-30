@@ -41,9 +41,10 @@ static void cmd_info(const command_t *cmd)
     device_info_t info;
     device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_VERSION, FIRMWARE_REPO);
     
-    // <--- СТРОГИЙ ПОРЯДОК
-    printf("project: %s\n", info.project);
+    // ПОРЯДОК СТРОГО ПО ПРИЛОЖЕНИЮ Б:
+    printf("name: %s\n", FIRMWARE_NAME); // <--- ДОБАВЛЕНО ИМЯ ПРОШИВКИ
     printf("version: %s\n", info.version);
+    printf("project: %s\n", info.project);
     printf("repo: %s\n", info.repo);
     printf("board: %s\n", info.board);
     printf("serial: %s\n", info.serial);
@@ -139,7 +140,7 @@ static void cmd_profiling_reset(const command_t *cmd)
     printf("profiling reset\n");
 }
 
-// <--- ТАБЛИЦА (help первым!)
+// ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
     { "info",           "device passport",                         cmd_info },
