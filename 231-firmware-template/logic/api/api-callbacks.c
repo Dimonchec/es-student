@@ -14,11 +14,7 @@
 #include "button-task/button-task.h"
 #include "pi-task/pi-task.h"
 
-
-static void cmd_help(const command_t *cmd);
-static void cmd_help(const command_t *cmd) { (void)cmd; }
-
-// Вспомогательная функция для разбора числа (без знака)
+// Вспомогательная функция для разбора числа
 static bool parse_u32(const char *text, uint32_t *value)
 {
     if (!isdigit((unsigned char)text[0])) return false;
@@ -30,7 +26,6 @@ static bool parse_u32(const char *text, uint32_t *value)
     return true;
 }
 
-// Вспомогательная функция для печати состояния светодиода
 static void print_led_state(void)
 {
     led_state_t state = led_task_get_state();
@@ -40,7 +35,7 @@ static void print_led_state(void)
     printf("led: %s, period %u ms\n", name, (unsigned)period);
 }
 
-// --- Реализация обработчиков ---
+static void cmd_help(const command_t *cmd) { (void)cmd; }
 
 static void cmd_info(const command_t *cmd)
 {
@@ -48,6 +43,7 @@ static void cmd_info(const command_t *cmd)
     device_info_t info;
     device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_VERSION, FIRMWARE_REPO);
     
+    // Строгий порядок из Приложения Б
     printf("project: %s\n", info.project);
     printf("version: %s\n", info.version);
     printf("repo: %s\n", info.repo);
@@ -64,26 +60,9 @@ static void cmd_uptime(const command_t *cmd)
     printf("uptime: %llu ms\n", systime_ms()); 
 }
 
-static void cmd_led_enable(const command_t *cmd) 
-{ 
-    (void)cmd; 
-    led_task_set_state(LED_STATE_ON); 
-    print_led_state(); 
-}
-
-static void cmd_led_disable(const command_t *cmd) 
-{ 
-    (void)cmd; 
-    led_task_set_state(LED_STATE_OFF); 
-    print_led_state(); 
-}
-
-static void cmd_led_blink(const command_t *cmd) 
-{ 
-    (void)cmd; 
-    led_task_set_state(LED_STATE_BLINK); 
-    print_led_state(); 
-}
+static void cmd_led_enable(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_ON); print_led_state(); }
+static void cmd_led_disable(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_OFF); print_led_state(); }
+static void cmd_led_blink(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_BLINK); print_led_state(); }
 
 static void cmd_led_period(const command_t *cmd)
 {
@@ -111,10 +90,14 @@ static void cmd_button(const command_t *cmd)
 
 static void cmd_pi_start(const command_t *cmd)
 {
-    if (pi_task_is_busy()) { printf("error: pi is busy\n"); return; }
+    if (pi_task_is_busy()) 
+    {
+        printf("error: pi is busy\n");
+        return;
+    }
 
     uint32_t terms = 1000000;
-    if (cmd->argc > 1) // <--- Если больше одного аргумента
+    if (cmd->argc > 1) 
     {
         printf("error: usage pi_start [terms]\n");
         return;
@@ -140,7 +123,7 @@ static void cmd_pi(const command_t *cmd)
 {
     (void)cmd;
     if (pi_task_is_done()) 
-        printf("pi: %.9f in %u ms\n", pi_task_get_result(), (unsigned)pi_task_get_time_ms()); // <--- Добавьте время
+        printf("pi: %.9f in %u ms\n", pi_task_get_result(), (unsigned)pi_task_get_time_ms());
     else if (pi_task_is_busy())
         printf("pi: running\n");
     else
@@ -153,11 +136,12 @@ static void cmd_profiling(const command_t *cmd)
 #if PROFILING_ENABLED
     printf("profiling\n");
     for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) {
-    profiling_result_t res;
-    if (profiling_get(i, &res)) {
-        printf("%-8s count %-7u mean %u us max %u us\n", res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
+        profiling_result_t res;
+        if (profiling_get(i, &res)) {
+            printf("%-8s count %-7u mean %u us max %u us\n", 
+                   res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
+        }
     }
-}
 #else
     printf("profiling is disabled in this build\n");
 #endif
@@ -167,11 +151,10 @@ static void cmd_profiling_reset(const command_t *cmd)
 {
     (void)cmd;
     profiling_reset();
-    printf("profiling reset\n"); // <--- Добавить эту строку
+    printf("profiling reset\n");
 }
 
-// --- Таблица команд ---
-// Обратите внимание: команды "help" здесь нет!
+// Таблица команд (help первым)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
     { "info",           "device passport",                         cmd_info },
@@ -187,5 +170,4 @@ const api_command_t api_commands[] = {
     { "profiling_reset","reset profiling stats",                   cmd_profiling_reset },
 };
 
-// Длина таблицы (используется в api.c)
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

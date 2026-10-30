@@ -15,7 +15,7 @@ int main()
 {
     platform_init();
     led_task_init();
-    button_task_init(led_task_next_state); // <--- Связь кнопки со светодиодом
+    button_task_init(led_task_next_state);
     pi_task_init();
     stdio_text_protocol_init();
     profiling_init();
@@ -30,19 +30,24 @@ int main()
 
     while (1) {
         profiling_start(STOPWATCH_LOOP);
+        
         profiling_start(STOPWATCH_COMMAND);
         const command_t *command = stdio_text_protocol_handle();
         if (command != NULL) api_handle(command);
         profiling_stop(STOPWATCH_COMMAND);
+        
         profiling_start(STOPWATCH_LED);
         led_task_handle();
         profiling_stop(STOPWATCH_LED);
+        
         profiling_start(STOPWATCH_BUTTON);
         button_task_handle();
         profiling_stop(STOPWATCH_BUTTON);
+        
         profiling_start(STOPWATCH_PI);
         pi_task_handle();
         profiling_stop(STOPWATCH_PI);
+        
         profiling_stop(STOPWATCH_LOOP);
     }
 }

@@ -52,11 +52,12 @@ void led_task_handle(void)
     {
         case LED_STATE_OFF:
         case LED_STATE_ON:
-            break; // Ничего не делаем
+            break;
 
         case LED_STATE_BLINK:
-            if (period_elapsed(&last_toggle_us, period_ms * 1000))
+            if (systime_us() - last_toggle_us >= period_ms * 1000) 
             {
+                last_toggle_us += period_ms * 1000;
                 led_is_on = !led_is_on;
                 platform_led_set(led_is_on);
             }
