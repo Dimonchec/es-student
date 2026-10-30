@@ -107,33 +107,31 @@ static void cmd_button(const command_t *cmd)
 
 static void cmd_pi_start(const command_t *cmd)
 {
-    if (pi_task_is_busy()) 
-    {
-        printf("error: pi is busy\n");
-        return;
-    }
+    if (pi_task_is_busy()) { printf("error: pi is busy\n"); return; }
 
     uint32_t terms = 1000000;
     if (cmd->argc > 0)
     {
         char *endptr;
         long val = strtol(cmd->argv[0], &endptr, 10);
+        // Проверка на 0 или отрицательное
         if (*endptr != '\0' || val <= 0) 
         { 
-            printf("error: usage pi_start [terms]\n"); 
+            if (*endptr == '\0' && val == 0) printf("error: terms must be greater than 0\n");
+            else printf("error: usage pi_start [terms]\n"); 
             return; 
         }
         terms = (uint32_t)val;
     }
     pi_task_start(terms);
-    printf("pi: started\n");
+    printf("pi: started, %u terms\n", (unsigned)terms); // <--- Формат из ТЗ
 }
 
 static void cmd_pi(const command_t *cmd)
 {
     (void)cmd;
     if (pi_task_is_done()) 
-        printf("pi: %.9f\n", pi_task_get_result());
+        printf("pi: %.9f in %u ms\n", pi_task_get_result(), pi_task_get_time_ms()); // <--- Добавьте время
     else if (pi_task_is_busy())
         printf("pi: running\n");
     else

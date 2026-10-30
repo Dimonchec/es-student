@@ -16,3 +16,4 @@ bool pi_task_is_done(void);
 bool pi_task_is_busy(void); // <--- ДОБАВЛЕНО для проверки на занятость
 double pi_task_get_result(void);
 uint32_t pi_task_get_terms(void);
+uint32_t pi_task_get_time_ms(void);
