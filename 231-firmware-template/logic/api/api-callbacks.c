@@ -45,7 +45,7 @@ static void cmd_info(const command_t *cmd)
     device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_VERSION, FIRMWARE_REPO);
     
     printf("project: %s\n", info.project);
-    printf("version: %s\n", info.version);
+    printf("version: %s\n", info.version); // <--- Должно быть здесь
     printf("repo: %s\n", info.repo);
     printf("board: %s\n", info.board);
     printf("serial: %s\n", info.serial);
@@ -53,7 +53,6 @@ static void cmd_info(const command_t *cmd)
            (unsigned)info.manufacturer, (unsigned)info.part, (unsigned)info.revision);
     printf("pico-sdk: %s\n", info.sdk_version);
 }
-
 static void cmd_uptime(const command_t *cmd) 
 { 
     (void)cmd; 
@@ -110,11 +109,16 @@ static void cmd_pi_start(const command_t *cmd)
     if (pi_task_is_busy()) { printf("error: pi is busy\n"); return; }
 
     uint32_t terms = 1000000;
-    if (cmd->argc > 0)
+    if (cmd->argc > 1) // <--- Если больше одного аргумента
+    {
+        printf("error: usage pi_start [terms]\n");
+        return;
+    }
+
+    if (cmd->argc == 1)
     {
         char *endptr;
         long val = strtol(cmd->argv[0], &endptr, 10);
-        // Проверка на 0 или отрицательное
         if (*endptr != '\0' || val <= 0) 
         { 
             if (*endptr == '\0' && val == 0) printf("error: terms must be greater than 0\n");
@@ -124,7 +128,7 @@ static void cmd_pi_start(const command_t *cmd)
         terms = (uint32_t)val;
     }
     pi_task_start(terms);
-    printf("pi: started, %u terms\n", (unsigned)terms); // <--- Формат из ТЗ
+    printf("pi: started, %u terms\n", (unsigned)terms);
 }
 
 static void cmd_pi(const command_t *cmd)
@@ -159,13 +163,12 @@ static void cmd_profiling_reset(const command_t *cmd)
 {
     (void)cmd;
     profiling_reset();
+    printf("profiling reset\n"); // <--- Добавить эту строку
 }
 
 // --- Таблица команд ---
 // Обратите внимание: команды "help" здесь нет!
 const api_command_t api_commands[] = {
-    { "info",           "device passport",                         cmd_info },
-    { "uptime",         "time since reset",                        cmd_uptime },
     { "led_enable",     "turn LED on",                             cmd_led_enable },
     { "led_disable",    "turn LED off",                            cmd_led_disable },
     { "led_blink",      "start blinking",                          cmd_led_blink },
@@ -175,6 +178,8 @@ const api_command_t api_commands[] = {
     { "pi",             "get last pi result",                      cmd_pi },
     { "profiling",      "show profiling stats",                    cmd_profiling },
     { "profiling_reset","reset profiling stats",                   cmd_profiling_reset },
+    { "info",           "device passport",                         cmd_info },
+    { "uptime",         "time since reset",                        cmd_uptime },
 };
 
 // Длина таблицы (используется в api.c)
