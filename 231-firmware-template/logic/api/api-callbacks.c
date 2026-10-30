@@ -124,16 +124,17 @@ static void cmd_profiling(const command_t *cmd)
     for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) {
         profiling_result_t res;
         if (profiling_get(i, &res)) {
-            // <--- СТРОГИЙ ФОРМАТ БЕЗ ВЫРАВНИВАНИЯ
-            printf("%s count %u mean %u us max %u us\n", 
-                   res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
+            // <--- СТРОГИЙ ФОРМАТ: mean с двумя знаками после запятой
+            printf("%-8s count %-7u mean %.2f us max %u us\n", 
+                   res.name, (unsigned)res.count, 
+                   (float)res.mean_us, 
+                   (unsigned)res.max_us);
         }
     }
 #else
     printf("profiling is disabled in this build\n");
 #endif
 }
-
 
 
 static void cmd_profiling_reset(const command_t *cmd)
