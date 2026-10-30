@@ -124,8 +124,8 @@ static void cmd_profiling(const command_t *cmd)
     for (uint32_t i = 0; i < PROFILING_MAX_STOPWATCHES; i++) {
         profiling_result_t res;
         if (profiling_get(i, &res)) {
-            printf("%-8s count %-7u mean %u us max %u us\n", 
-                   res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
+            printf("%-8s count %-7u mean %u us max %u us\n", res.name, (unsigned)res.count, (unsigned)res.mean_us, (unsigned)res.max_us);
+                    
         }
     }
 #else
