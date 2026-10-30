@@ -9,12 +9,10 @@
 #include "profiling/profiling.h"
 #include "systime/systime.h"
 #include "firmware.h"
-
 #include "led-task/led-task.h"
 #include "button-task/button-task.h"
 #include "pi-task/pi-task.h"
 
-// Вспомогательная функция для разбора числа
 static bool parse_u32(const char *text, uint32_t *value)
 {
     if (!isdigit((unsigned char)text[0])) return false;
@@ -43,7 +41,7 @@ static void cmd_info(const command_t *cmd)
     device_info_t info;
     device_get_info(&info, FIRMWARE_PROJECT, FIRMWARE_VERSION, FIRMWARE_REPO);
     
-    // Строгий порядок из Приложения Б
+    // <--- СТРОГИЙ ПОРЯДОК
     printf("project: %s\n", info.project);
     printf("version: %s\n", info.version);
     printf("repo: %s\n", info.repo);
@@ -54,12 +52,7 @@ static void cmd_info(const command_t *cmd)
     printf("pico-sdk: %s\n", info.sdk_version);
 }
 
-static void cmd_uptime(const command_t *cmd) 
-{ 
-    (void)cmd; 
-    printf("uptime: %llu ms\n", systime_ms()); 
-}
-
+static void cmd_uptime(const command_t *cmd) { (void)cmd; printf("uptime: %llu ms\n", systime_ms()); }
 static void cmd_led_enable(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_ON); print_led_state(); }
 static void cmd_led_disable(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_OFF); print_led_state(); }
 static void cmd_led_blink(const command_t *cmd) { (void)cmd; led_task_set_state(LED_STATE_BLINK); print_led_state(); }
@@ -90,18 +83,10 @@ static void cmd_button(const command_t *cmd)
 
 static void cmd_pi_start(const command_t *cmd)
 {
-    if (pi_task_is_busy()) 
-    {
-        printf("error: pi is busy\n");
-        return;
-    }
+    if (pi_task_is_busy()) { printf("error: pi is busy\n"); return; }
 
     uint32_t terms = 1000000;
-    if (cmd->argc > 1) 
-    {
-        printf("error: usage pi_start [terms]\n");
-        return;
-    }
+    if (cmd->argc > 1) { printf("error: usage pi_start [terms]\n"); return; }
 
     if (cmd->argc == 1)
     {
@@ -154,7 +139,7 @@ static void cmd_profiling_reset(const command_t *cmd)
     printf("profiling reset\n");
 }
 
-// Таблица команд (help первым)
+// <--- ТАБЛИЦА (help первым!)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
     { "info",           "device passport",                         cmd_info },
