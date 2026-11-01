@@ -13,6 +13,9 @@
 #include "button-task/button-task.h"
 #include "pi-task/pi-task.h"
 #include "platform/platform.h"
+#include "telemetry-task/telemetry-task.h"
+
+#define TELEMETRY_DEFAULT_PERIOD_MS 100
 
 static bool parse_u32(const char *text, uint32_t *value)
 {
@@ -159,6 +162,41 @@ static void cmd_get_temp(const command_t *cmd)
     printf("temp: %.1f C\n", temp); // <--- 1 знак после запятой
 }
 
+void api_print_telemetry(const telemetry_record_t *record)
+{
+    printf("tm: %llu %.3f %.1f\n", 
+           record->time_us, 
+           (double)record->voltage_v, 
+           (double)record->temp_c);
+}
+
+static void cmd_tm_start(const command_t *cmd)
+{
+    uint32_t period_ms = TELEMETRY_DEFAULT_PERIOD_MS;
+    if (cmd->argc > 1) { printf("error: usage tm_start [<period_ms>]\n"); return; }
+    if (cmd->argc == 1)
+    {
+        char *endptr;
+        long val = strtol(cmd->argv[0], &endptr, 10);
+        if (*endptr != '\0' || val <= 0) { printf("error: usage tm_start [<period_ms>]\n"); return; }
+        period_ms = (uint32_t)val;
+    }
+    if (!telemetry_task_start(period_ms))
+    {
+        printf("error: period_ms must be at least 10\n");
+        return;
+    }
+    printf("telemetry: started, period %u ms\n", (unsigned)period_ms);
+}
+
+static void cmd_tm_stop(const command_t *cmd)
+{
+    (void)cmd;
+    telemetry_task_stop();
+    printf("telemetry: stopped\n");
+}
+
+
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
@@ -175,6 +213,8 @@ const api_command_t api_commands[] = {
     { "profiling_reset","reset profiling stats",                   cmd_profiling_reset },
     { "get_voltage", "voltage on GP26, ADC input 0", cmd_get_voltage },
     { "get_temp", "chip temperature, degrees Celsius", cmd_get_temp },
+    { "tm_start", "start telemetry", cmd_tm_start },
+    { "tm_stop", "stop telemetry", cmd_tm_stop },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

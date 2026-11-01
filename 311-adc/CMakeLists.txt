@@ -27,8 +27,12 @@ add_library(logic STATIC
     logic/led-task/led-task.c
     logic/button-task/button-task.c
     logic/pi-task/pi-task.c
+    logic/telemetry-task/telemetry-task.c
 )
-target_include_directories(logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/logic ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(logic PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/telemetry-task
+)
 
 # Подключаем протокол как PUBLIC, остальные библиотеки как PRIVATE
 target_link_libraries(logic 

@@ -8,8 +8,9 @@
 #include "logging/log.h"
 #include "systime/systime.h"
 #include "firmware.h"
+#include "telemetry-task/telemetry-task.h"
 
-typedef enum { STOPWATCH_LOOP, STOPWATCH_COMMAND, STOPWATCH_LED, STOPWATCH_BUTTON, STOPWATCH_PI } stopwatch_id_t;
+typedef enum { STOPWATCH_LOOP, STOPWATCH_COMMAND, STOPWATCH_LED, STOPWATCH_BUTTON, STOPWATCH_PI, STOPWATCH_TELEMETRY } stopwatch_id_t;
 
 int main()
 {
@@ -19,12 +20,14 @@ int main()
     pi_task_init();
     stdio_text_protocol_init();
     profiling_init();
+    telemetry_task_init(api_print_telemetry);
     
     profiling_stopwatch_init(STOPWATCH_LOOP, "loop");
     profiling_stopwatch_init(STOPWATCH_COMMAND, "command");
     profiling_stopwatch_init(STOPWATCH_LED, "led");
     profiling_stopwatch_init(STOPWATCH_BUTTON, "button");
-    profiling_stopwatch_init(STOPWATCH_PI, "pi");
+    profiling_stopwatch_init(STOPWATCH_PI, "pi");   
+    profiling_stopwatch_init(STOPWATCH_TELEMETRY, "telemetry");
 
     LOG_INF("%s %s\n", FIRMWARE_NAME, FIRMWARE_VERSION);
 
@@ -49,5 +52,9 @@ int main()
         profiling_stop(STOPWATCH_PI);
         
         profiling_stop(STOPWATCH_LOOP);
+
+        profiling_start(STOPWATCH_TELEMETRY);
+        telemetry_task_handle();
+        profiling_stop(STOPWATCH_TELEMETRY);
     }
 }
