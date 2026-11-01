@@ -152,6 +152,12 @@ static void cmd_get_voltage(const command_t *cmd)
     printf("voltage: %.3f V\n", voltage); // <--- 3 знака после запятой
 }
 
+static void cmd_get_temp(const command_t *cmd)
+{
+    (void)cmd;
+    float temp = platform_temp_read();
+    printf("temp: %.1f C\n", temp); // <--- 1 знак после запятой
+}
 
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
@@ -168,6 +174,7 @@ const api_command_t api_commands[] = {
     { "profiling",      "show profiling stats",                    cmd_profiling },
     { "profiling_reset","reset profiling stats",                   cmd_profiling_reset },
     { "get_voltage", "voltage on GP26, ADC input 0", cmd_get_voltage },
+    { "get_temp", "chip temperature, degrees Celsius", cmd_get_temp },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
