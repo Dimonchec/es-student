@@ -13,6 +13,8 @@
 
 #define ADC_TEMP_CHANNEL 4 
 
+#define CHARGE_PIN 22
+
 void platform_init(void)
 {
     stdio_init_all();
@@ -22,6 +24,9 @@ void platform_init(void)
     gpio_init(BUTTON_PIN);
     gpio_set_dir(BUTTON_PIN, GPIO_IN);
     gpio_pull_up(BUTTON_PIN);
+    gpio_init(CHARGE_PIN);
+    gpio_set_dir(CHARGE_PIN, GPIO_OUT);
+    gpio_put(CHARGE_PIN, 0);
 
     adc_init();
     adc_gpio_init(ADC_PIN);
@@ -51,3 +56,9 @@ float platform_temp_read(void)
     // Формула из даташита: T = 27 - (U - 0.706) / 0.001721
     return 27.0f - (voltage - 0.706f) / 0.001721f;
 }
+
+void platform_charge_set(bool on)
+{
+    gpio_put(CHARGE_PIN, on);
+}
+
