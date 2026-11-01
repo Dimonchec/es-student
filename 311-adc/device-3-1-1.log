@@ -1,0 +1,42 @@
+задание: 3.1.1
+проект: 311-adc
+устройство: 2e8a:000a
+серийный номер: 53032847491E7A9C
+порт: COM11
+начало: 2026-11-01T14:16:35
+   0.000 --> 
+   0.500 --> help
+   0.500 <-- help
+   0.500 <-- help            list of commands
+   0.500 <-- info            device passport
+   0.500 <-- uptime          time since reset
+   0.500 <-- led_enable      turn LED on
+   0.500 <-- led_disable     turn LED off
+   0.500 <-- led_blink       start blinking
+   0.500 <-- led_period      set blink period in ms: led_period <ms>
+   0.500 <-- button          button state and press count
+   0.500 <-- pi_start        start pi calculation: pi_start [terms]
+   0.500 <-- pi              get last pi result
+   0.500 <-- profiling       show profiling stats
+   0.500 <-- profiling_reset reset profiling stats
+   0.547 <-- get_voltage     voltage on GP26, ADC input 0
+   1.547 --> info
+   1.594 <-- info
+   1.594 <-- name: es-adc
+   1.594 <-- version: 1.0.0
+   1.594 <-- project: 311-adc
+   1.594 <-- repo: https://github.com/Dimonchec/es-student
+   1.594 <-- board: pico
+   1.594 <-- serial: 53032847491E7A9C
+   1.594 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+   1.594 <-- pico-sdk: 2.3.0
+   2.610 --> get_voltage
+   2.672 <-- get_voltage
+   2.672 <-- voltage: 0.562 V
+   3.625 --> get_voltage
+   3.688 <-- get_voltage
+   3.688 <-- voltage: 0.636 V
+   4.657 --> get_voltage
+   4.719 <-- get_voltage
+   4.719 <-- voltage: 0.708 V
+итог: отправлено кадров 6, принято строк 29
