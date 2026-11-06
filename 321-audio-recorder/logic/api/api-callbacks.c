@@ -150,6 +150,11 @@ static void cmd_profiling_reset(const command_t *cmd)
 
 static void cmd_get_voltage(const command_t *cmd)
 {
+    if (platform_adc_busy())
+    {
+        printf("error: adc busy\n");
+        return;
+    }
     (void)cmd;
     float voltage = platform_voltage_read();
     printf("voltage: %.3f V\n", voltage); // <--- 3 знака после запятой
@@ -157,6 +162,11 @@ static void cmd_get_voltage(const command_t *cmd)
 
 static void cmd_get_temp(const command_t *cmd)
 {
+    if (platform_adc_busy())
+    {
+        printf("error: adc busy\n");
+        return;
+    }
     (void)cmd;
     float temp = platform_temp_read();
     printf("temp: %.1f C\n", temp); // <--- 1 знак после запятой
@@ -172,6 +182,11 @@ void api_print_telemetry(const telemetry_record_t *record)
 
 static void cmd_tm_start(const command_t *cmd)
 {
+    if (platform_adc_busy())
+    {
+        printf("error: adc busy\n");
+        return;
+    }
     uint32_t period_ms = TELEMETRY_DEFAULT_PERIOD_MS;
     if (cmd->argc > 1) { printf("error: usage tm_start [<period_ms>]\n"); return; }
     if (cmd->argc == 1)
@@ -236,6 +251,55 @@ static void cmd_timer_blink_stop(const command_t *cmd)
     printf("timer_blink: stopped, %u toggles\n", (unsigned)toggles);
 }
 
+static void cmd_cap_start(const command_t *cmd)
+{
+    uint32_t count, period_us;
+    if (cmd->argc != 2 || !parse_u32(cmd->argv[0], &count) || !parse_u32(cmd->argv[1], &period_us))
+    {
+        printf("error: usage cap_start <N> <period_us>\n");
+        return;
+    }
+    if (count == 0 || count > PLATFORM_CAPTURE_MAX || period_us < 10)
+    {
+        printf("error: N must be 1..2000, period_us at least 10\n");
+        return;
+    }
+    if (telemetry_task_get_state() == TELEMETRY_STATE_RUN)
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+    if (!platform_capture_start(count, period_us))
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+    printf("capture: started, %u samples, period %u us\n", (unsigned)count, (unsigned)period_us);
+}
+
+static void cmd_cap_dump(const command_t *cmd)
+{
+    (void)cmd;
+    if (!platform_capture_done())
+    {
+        printf("error: no capture\n");
+        return;
+    }
+    platform_capture_t cap;
+    platform_capture_get(&cap);
+    printf("capture: %u samples, period %u us, interval %u..%u us, handler %.1f %%\n",
+           (unsigned)cap.count, (unsigned)cap.period_us,
+           (unsigned)cap.min_interval_us, (unsigned)cap.max_interval_us,
+           (double)cap.handler_percent);
+    printf("cap:");
+    for (uint32_t i = 0; i < cap.count; i++)
+    {
+        if (i % 16 == 0) printf("\n");
+        printf(" %u", cap.samples[i]);
+    }
+    printf("\n");
+}
+
 
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
@@ -259,6 +323,8 @@ const api_command_t api_commands[] = {
     { "charge_off", "turn charge off", cmd_charge_off },
     { "timer_blink_start", "blink led by timer: timer_blink_start <period_ms>", cmd_timer_blink_start },
     { "timer_blink_stop", "stop timer blink, number of toggles", cmd_timer_blink_stop },
+    { "cap_start", "start capture: cap_start <N> <period_us>", cmd_cap_start },
+    { "cap_dump", "dump last capture", cmd_cap_dump },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
