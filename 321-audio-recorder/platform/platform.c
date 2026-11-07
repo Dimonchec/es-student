@@ -183,7 +183,6 @@ void platform_capture_get(platform_capture_t *capture)
     capture->samples = capture_samples;
     capture->count = capture_count;
     capture->period_us = capture_period_us;
-    
     // Считаем интервалы по тем отсчетам, что есть
     uint32_t min_int = UINT32_MAX;
     uint32_t max_int = 0;

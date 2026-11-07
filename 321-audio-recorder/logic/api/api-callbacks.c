@@ -280,6 +280,14 @@ static void cmd_cap_start(const command_t *cmd)
 static void cmd_cap_dump(const command_t *cmd)
 {
     (void)cmd;
+    
+    // Ждем завершения (максимум 1 секунда)
+    uint32_t start = systime_ms();
+    while (!platform_capture_done() && (systime_ms() - start) < 1000)
+    {
+        // пустой цикл
+    }
+    
     platform_capture_t cap;
     platform_capture_get(&cap);
     
@@ -293,6 +301,9 @@ static void cmd_cap_dump(const command_t *cmd)
            (unsigned)cap.count, (unsigned)cap.period_us,
            (unsigned)cap.min_interval_us, (unsigned)cap.max_interval_us,
            (double)cap.handler_percent);
+    // ... вывод кодов ...
+
+
     printf("cap:");
     for (uint32_t i = 0; i < cap.count; i++)
     {
