@@ -165,7 +165,7 @@ bool platform_adc_busy(void)
 
 bool platform_capture_done(void)
 {
-    return capture_index >= capture_count;
+    return (capture_index >= capture_count) && (capture_count > 0);
 }
 
 void platform_capture_get(platform_capture_t *capture)
