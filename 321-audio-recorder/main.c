@@ -10,8 +10,9 @@
 #include "firmware.h"
 #include "telemetry-task/telemetry-task.h"
 #include "block-task/block-task.h"
+#include "stream-task/stream-task.h"
 
-typedef enum { STOPWATCH_LOOP, STOPWATCH_COMMAND, STOPWATCH_LED, STOPWATCH_BUTTON, STOPWATCH_PI, STOPWATCH_TELEMETRY } stopwatch_id_t;
+typedef enum { STOPWATCH_LOOP, STOPWATCH_COMMAND, STOPWATCH_LED, STOPWATCH_BUTTON, STOPWATCH_PI, STOPWATCH_TELEMETRY,  STOPWATCH_STREAM } stopwatch_id_t;
 
 int main()
 {
@@ -22,6 +23,7 @@ int main()
     stdio_text_protocol_init();
     profiling_init();
     telemetry_task_init(api_print_telemetry);
+    stream_task_init(api_send_frame);
     
     profiling_stopwatch_init(STOPWATCH_LOOP, "loop");
     profiling_stopwatch_init(STOPWATCH_COMMAND, "command");
@@ -58,5 +60,6 @@ int main()
         telemetry_task_handle();
         profiling_stop(STOPWATCH_TELEMETRY);
         block_task_handle();
+        stream_task_handle();
     }
 }

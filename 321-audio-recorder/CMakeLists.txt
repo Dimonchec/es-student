@@ -30,11 +30,14 @@ add_library(logic STATIC
     logic/pi-task/pi-task.c
     logic/telemetry-task/telemetry-task.c
     logic/block-task/block-task.c
+    logic/block-task/block-task.c
+    logic/stream-task/stream-task.c
 )
 target_include_directories(logic PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/logic ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/logic/telemetry-task
-    ${CMAKE_CURRENT_SOURCE_DIR}/logic/block-task 
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/block-task
+    ${CMAKE_CURRENT_SOURCE_DIR}/logic/stream-task 
 )
 
 # Подключаем протокол как PUBLIC, остальные библиотеки как PRIVATE
