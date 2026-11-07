@@ -3,61 +3,61 @@
 устройство: 2e8a:000a
 серийный номер: 53032847491E7A9C
 порт: COM11
-начало: 2026-11-07T03:22:13
+начало: 2026-11-07T03:35:00
    0.000 --> 
-   0.532 --> help
-   0.532 <-- help
-   0.532 <-- help            list of commands
-   0.532 <-- info            device passport
-   0.532 <-- uptime          time since reset
-   0.532 <-- led_enable      turn LED on
-   0.532 <-- led_disable     turn LED off
-   0.532 <-- led_blink       start blinking
-   0.532 <-- led_period      set blink period in ms: led_period <ms>
-   0.532 <-- button          button state and press count
-   0.532 <-- pi_start        start pi calculation: pi_start [terms]
-   0.532 <-- pi              get last pi result
-   0.532 <-- profiling       show profiling stats
-   0.532 <-- profiling_reset reset profiling stats
-   0.532 <-- get_voltage     voltage on GP26, ADC input 0
-   0.532 <-- get_temp        chip temperature, degrees Celsius
-   0.532 <-- tm_start        start telemetry
-   0.532 <-- tm_stop         stop telemetry
-   0.532 <-- charge_on       turn charge on
-   0.532 <-- charge_off      turn charge off
-   0.532 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
-   0.594 <-- timer_blink_stop stop timer blink, number of toggles
-   0.594 <-- cap_start       start capture: cap_start <N> <period_us>
-   0.594 <-- cap_dump        dump last capture
-   1.532 --> info
-   1.594 <-- info
-   1.594 <-- name: es-recorder
-   1.594 <-- version: 1.0.0
-   1.594 <-- project: 321-audio-recorder
-   1.594 <-- repo: https://github.com/Dimonchec/es-student
-   1.594 <-- board: pico
-   1.594 <-- serial: 53032847491E7A9C
-   1.594 <-- chip: manufacturer 0x927, part 0x0002, revision 2
-   1.594 <-- pico-sdk: 2.3.0
-   2.532 --> dma_cap 1000
-   2.579 <-- dma_cap 1000
-   2.579 <-- error: unknown command 'dma_cap', try help
-   3.094 --> dma_cap 4410
-   3.157 <-- dma_cap 4410
-   3.157 <-- error: unknown command 'dma_cap', try help
-   3.625 --> dma_cap 8192
-   3.704 <-- dma_cap 8192
-   3.704 <-- error: unknown command 'dma_cap', try help
-   4.157 --> uptime
-   4.204 <-- uptime
-   4.204 <-- uptime: 13792 ms
-   4.688 --> dma_cap 0
-   4.750 <-- dma_cap 0
-   4.750 <-- error: unknown command 'dma_cap', try help
-   5.204 --> dma_cap 9000
-   5.266 <-- dma_cap 9000
-   5.266 <-- error: unknown command 'dma_cap', try help
-   5.719 --> dma_cap
-   5.782 <-- dma_cap
-   5.782 <-- error: unknown command 'dma_cap', try help
+   0.531 --> help
+   0.531 <-- help
+   0.531 <-- help            list of commands
+   0.531 <-- info            device passport
+   0.531 <-- uptime          time since reset
+   0.531 <-- led_enable      turn LED on
+   0.531 <-- led_disable     turn LED off
+   0.531 <-- led_blink       start blinking
+   0.531 <-- led_period      set blink period in ms: led_period <ms>
+   0.531 <-- button          button state and press count
+   0.531 <-- pi_start        start pi calculation: pi_start [terms]
+   0.531 <-- pi              get last pi result
+   0.531 <-- profiling       show profiling stats
+   0.531 <-- profiling_reset reset profiling stats
+   0.531 <-- get_voltage     voltage on GP26, ADC input 0
+   0.531 <-- get_temp        chip temperature, degrees Celsius
+   0.531 <-- tm_start        start telemetry
+   0.531 <-- tm_stop         stop telemetry
+   0.531 <-- charge_on       turn charge on
+   0.531 <-- charge_off      turn charge off
+   0.531 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
+   0.593 <-- timer_blink_stop stop timer blink, number of toggles
+   0.593 <-- cap_start       start capture: cap_start <N> <period_us>
+   0.593 <-- cap_dump        dump last capture
+   1.546 --> info
+   1.593 <-- info
+   1.593 <-- name: es-recorder
+   1.593 <-- version: 1.0.0
+   1.593 <-- project: 321-audio-recorder
+   1.593 <-- repo: https://github.com/Dimonchec/es-student
+   1.593 <-- board: pico
+   1.593 <-- serial: 53032847491E7A9C
+   1.593 <-- chip: manufacturer 0x927, part 0x0002, revision 2
+   1.593 <-- pico-sdk: 2.3.0
+   2.562 --> dma_cap 1000
+   2.609 <-- dma_cap 1000
+   2.609 <-- error: unknown command 'dma_cap', try help
+   3.109 --> dma_cap 4410
+   3.171 <-- dma_cap 4410
+   3.171 <-- error: unknown command 'dma_cap', try help
+   3.640 --> dma_cap 8192
+   3.703 <-- dma_cap 8192
+   3.703 <-- error: unknown command 'dma_cap', try help
+   4.156 --> uptime
+   4.218 <-- uptime
+   4.218 <-- uptime: 14394 ms
+   4.671 --> dma_cap 0
+   4.734 <-- dma_cap 0
+   4.734 <-- error: unknown command 'dma_cap', try help
+   5.187 --> dma_cap 9000
+   5.250 <-- dma_cap 9000
+   5.250 <-- error: unknown command 'dma_cap', try help
+   5.703 --> dma_cap
+   5.765 <-- dma_cap
+   5.765 <-- error: unknown command 'dma_cap', try help
 итог: отправлено кадров 10, принято строк 46

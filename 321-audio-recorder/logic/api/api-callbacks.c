@@ -287,11 +287,15 @@ static void cmd_cap_dump(const command_t *cmd)
         // пустой цикл
     }
 
-    // <--- ЗАДЕРЖКА (чтобы точно дождаться)
-    for (volatile int i = 0; i < 100000; i++);
-
     platform_capture_t cap;
     platform_capture_get(&cap);
+    
+    // Если захват не начинался, выводим ошибку (как требует ТЗ)
+    if (cap.count == 0)
+    {
+        printf("error: no capture\n");
+        return;
+    }
     
     printf("capture: %u samples, period %u us, interval %u..%u us, handler %.1f %%\n",
            (unsigned)cap.count, (unsigned)cap.period_us,
