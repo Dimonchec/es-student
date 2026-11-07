@@ -56,3 +56,6 @@ void platform_write(const void *data, uint32_t bytes);
 
 // --- ГЕНЕРАТОР ТОНА ---
 bool platform_tone_set(uint32_t freq_hz); // <--- ДОБАВИТЬ
+bool platform_watchdog_enable(uint32_t timeout_ms);
+void platform_watchdog_feed(void);
+bool platform_watchdog_caused_reset(uint32_t *restarts);

@@ -432,6 +432,50 @@ static void cmd_generate_tone(const command_t *cmd)
         printf("tone: %u Hz\n", (unsigned)freq_hz);
 }
 
+static void cmd_wdt_enable(const command_t *cmd)
+{
+    uint32_t timeout_ms;
+    if (cmd->argc != 1 || !parse_u32(cmd->argv[0], &timeout_ms))
+    {
+        printf("error: usage wdt_enable <timeout_ms>\n");
+        return;
+    }
+    if (!platform_watchdog_enable(timeout_ms))
+    {
+        printf("error: timeout_ms must be 1..8388\n");
+        return;
+    }
+    printf("wdt: enabled, timeout %u ms\n", (unsigned)timeout_ms);
+}
+
+static void cmd_hang(const command_t *cmd)
+{
+    (void)cmd;
+    printf("hang: superloop stopped\n");
+    
+    // Суперцикл больше не идёт, прерывания приходят как прежде
+    while (1)
+    {
+        // Зависаем навсегда
+    }
+}
+
+static void cmd_reset_reason(const command_t *cmd)
+{
+    (void)cmd;
+    uint32_t restarts;
+    bool wdt = platform_watchdog_caused_reset(&restarts);
+    
+    if (wdt)
+    {
+        printf("reset: watchdog, restarts %u\n", (unsigned)restarts);
+    }
+    else
+    {
+        printf("reset: other, restarts %u\n", (unsigned)restarts);
+    }
+}
+
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
@@ -460,6 +504,9 @@ const api_command_t api_commands[] = {
     { "stream_start", "start stream: stream_start [8|16]", cmd_stream_start },
     { "stream_stop", "stop stream", cmd_stream_stop },
     { "generate_tone", "generate tone on GP20: generate_tone <Hz>", cmd_generate_tone },
+    { "wdt_enable", "enable watchdog: wdt_enable <timeout_ms>", cmd_wdt_enable },
+    { "hang", "hang superloop", cmd_hang },
+    { "reset_reason", "show reset reason", cmd_reset_reason },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

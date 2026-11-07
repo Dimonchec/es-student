@@ -61,5 +61,9 @@ int main()
         profiling_stop(STOPWATCH_TELEMETRY);
         block_task_handle();
         stream_task_handle();
+
+        platform_watchdog_feed();
+    
+        profiling_stop(STOPWATCH_LOOP);
     }
 }
