@@ -170,15 +170,16 @@ bool platform_capture_done(void)
 
 void platform_capture_get(platform_capture_t *capture)
 {
-    if (capture_count == 0 || capture_index == 0) {
+    if (capture_count == 0) {
         capture->samples = capture_samples;
         capture->count = 0;
         capture->period_us = 0;
         capture->min_interval_us = 0;
         capture->max_interval_us = 0;
         capture->handler_percent = 0.0f;
-    return;
-}
+        return;
+    }
+    
     capture->samples = capture_samples;
     capture->count = capture_count;
     capture->period_us = capture_period_us;
@@ -186,7 +187,7 @@ void platform_capture_get(platform_capture_t *capture)
     // Считаем интервалы по тем отсчетам, что есть
     uint32_t min_int = UINT32_MAX;
     uint32_t max_int = 0;
-    for (uint32_t i = 1; i < capture_index; i++) // <--- capture_index, а не capture_count!
+    for (uint32_t i = 1; i < capture_index; i++)
     {
         uint32_t diff = capture_times[i] - capture_times[i - 1];
         if (diff < min_int) min_int = diff;
@@ -195,6 +196,6 @@ void platform_capture_get(platform_capture_t *capture)
     capture->min_interval_us = (capture_index > 1) ? min_int : 0;
     capture->max_interval_us = (capture_index > 1) ? max_int : 0;
     
-    uint32_t total_time = capture_times[capture_index - 1] - capture_times[0];
+    uint32_t total_time = (capture_index > 1) ? (capture_times[capture_index - 1] - capture_times[0]) : 0;
     capture->handler_percent = (total_time > 0) ? (100.0f * capture_handler_us / total_time) : 0.0f;
 }

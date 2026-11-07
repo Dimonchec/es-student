@@ -280,10 +280,16 @@ static void cmd_cap_start(const command_t *cmd)
 static void cmd_cap_dump(const command_t *cmd)
 {
     (void)cmd;
+    // Ждем завершения (максимум 1 секунда)
+    uint32_t start = systime_ms();
+    while (!platform_capture_done() && (systime_ms() - start) < 1000)
+    {
+        // пустой цикл
+    }
+    
     platform_capture_t cap;
     platform_capture_get(&cap);
     
-    // Если захват не начинался — ошибка
     if (cap.count == 0)
     {
         printf("error: no capture\n");
