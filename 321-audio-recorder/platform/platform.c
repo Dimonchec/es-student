@@ -6,6 +6,8 @@
 #include "hardware/dma.h"
 #include "hardware/irq.h"
 #include <stddef.h>
+#include "hardware/pwm.h"
+#include "hardware/clocks.h"
 
 #define LED_PIN 25
 #define BUTTON_PIN 15
@@ -18,6 +20,11 @@
 #define ADC_TEMP_CHANNEL 4 
 
 #define CHARGE_PIN 22
+
+// --- ДЛЯ ГЕНЕРАТОРА ТОНА ---
+#define TONE_PIN 20
+#define TONE_COUNT_HZ 1000000
+static uint tone_slice;
 
 // --- ДЛЯ DMA БЛОКА ---
 #define ADC_CLOCK_HZ 48000000.0f
@@ -161,6 +168,13 @@ void platform_init(void)
     stream_channels[1] = dma_claim_unused_channel(true);
     irq_set_exclusive_handler(DMA_IRQ_0, on_stream_buffer);
     irq_set_enabled(DMA_IRQ_0, true);
+    // <--- ДОБАВИТЬ В КОНЕЦ platform_init()
+    gpio_set_function(TONE_PIN, GPIO_FUNC_PWM);
+    tone_slice = pwm_gpio_to_slice_num(TONE_PIN);
+    pwm_config cfg = pwm_get_default_config();
+    pwm_config_set_clkdiv(&cfg, (float)(clock_get_hz(clk_sys) / TONE_COUNT_HZ));
+    pwm_init(tone_slice, &cfg, true);
+    pwm_set_chan_level(tone_slice, PWM_CHAN_A, 0);
 }
 
 // ============================================================
@@ -427,4 +441,26 @@ uint32_t platform_stream_overruns(void)
 void platform_write(const void *data, uint32_t bytes)
 {
     stdio_put_string((const char *)data, (int)bytes, false, false);
+}
+bool platform_tone_set(uint32_t freq_hz)
+{
+    if (freq_hz == 0)
+    {
+        pwm_set_chan_level(tone_slice, PWM_CHAN_A, 0);
+        return true;
+    }
+    
+    if (freq_hz < 20 || freq_hz > 20000)
+    {
+        return false;
+    }
+    
+    // Период в микросекундах
+    uint32_t period_us = TONE_COUNT_HZ / freq_hz;
+    uint16_t wrap = period_us - 1;
+    uint16_t level = period_us / 2;
+    
+    pwm_set_wrap(tone_slice, wrap);
+    pwm_set_chan_level(tone_slice, PWM_CHAN_A, level);
+    return true;
 }

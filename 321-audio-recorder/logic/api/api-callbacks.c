@@ -413,6 +413,25 @@ static void cmd_stream_stop(const command_t *cmd)
            (unsigned)stream_task_get_overruns());
 }
 
+static void cmd_generate_tone(const command_t *cmd)
+{
+    uint32_t freq_hz;
+    if (cmd->argc != 1 || !parse_u32(cmd->argv[0], &freq_hz))
+    {
+        printf("error: usage generate_tone <Hz>\n");
+        return;
+    }
+    if (!platform_tone_set(freq_hz))
+    {
+        printf("error: Hz must be 0 or 20..20000\n");
+        return;
+    }
+    if (freq_hz == 0)
+        printf("tone: off\n");
+    else
+        printf("tone: %u Hz\n", (unsigned)freq_hz);
+}
+
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
@@ -440,6 +459,7 @@ const api_command_t api_commands[] = {
     { "dma_cap", "capture block via DMA: dma_cap <N>", cmd_dma_cap },
     { "stream_start", "start stream: stream_start [8|16]", cmd_stream_start },
     { "stream_stop", "stop stream", cmd_stream_stop },
+    { "generate_tone", "generate tone on GP20: generate_tone <Hz>", cmd_generate_tone },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

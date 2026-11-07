@@ -17,8 +17,8 @@ uint32_t platform_blink_stop(void);
 typedef enum {
     ADC_FREE,
     ADC_CAPTURE,
-    ADC_BLOCK, 
-    ADC_STREAM,// <--- ДОБАВИТЬ
+    ADC_BLOCK,
+    ADC_STREAM,
 } adc_user_t;
 
 typedef struct {
@@ -53,3 +53,6 @@ const uint8_t *platform_stream_next(uint32_t *samples);
 void platform_stream_release(void);
 uint32_t platform_stream_overruns(void);
 void platform_write(const void *data, uint32_t bytes);
+
+// --- ГЕНЕРАТОР ТОНА ---
+bool platform_tone_set(uint32_t freq_hz); // <--- ДОБАВИТЬ
