@@ -3,6 +3,8 @@
 #include "hardware/gpio.h"
 #include "hardware/adc.h"
 #include "pico/time.h"
+#include "hardware/dma.h"
+#include "hardware/irq.h"
 
 #define LED_PIN 25
 #define BUTTON_PIN 15
@@ -16,7 +18,16 @@
 
 #define CHARGE_PIN 22
 
-static volatile adc_user_t adc_user = ADC_FREE; // <--- ДОБАВИТЬ
+// --- ДЛЯ DMA БЛОКА ---
+#define ADC_CLOCK_HZ 48000000.0f
+static int block_channel;
+static uint16_t block_samples[PLATFORM_BLOCK_MAX];
+static uint32_t block_start_us;
+static volatile uint32_t block_end_us;
+static volatile bool block_ready;
+
+// --- ДЛЯ ЗАХВАТА ПО ТАЙМЕРУ ---
+static volatile adc_user_t adc_user = ADC_FREE;
 
 static repeating_timer_t capture_timer;
 static uint16_t capture_samples[PLATFORM_CAPTURE_MAX];
@@ -25,6 +36,56 @@ static uint32_t capture_count;
 static uint32_t capture_period_us;
 static volatile uint32_t capture_index;
 static volatile uint32_t capture_handler_us;
+
+// --- ДЛЯ БУДИЛЬНИКА ИНДИКАТОРА ---
+static repeating_timer_t blink_timer;
+static bool blink_running = false;
+static volatile bool blink_on = false;
+static volatile uint32_t blink_toggles = 0;
+
+// ============================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ DMA
+// ============================================================
+
+// АЦП в непрерывном режиме с шагом 44.1 кГц, буфер АЦП с запросом DMA на каждый отсчёт
+static void adc_free_running(void)
+{
+    adc_select_input(ADC_CHANNEL);
+    adc_fifo_setup(true, true, 1, false, false);
+    adc_set_clkdiv(ADC_CLOCK_HZ / PLATFORM_SAMPLE_RATE_HZ - 1);
+}
+
+// АЦП обратно в режим отсчётов по команде
+static void adc_one_shot(void)
+{
+    adc_run(false);
+    adc_fifo_drain();
+    adc_fifo_setup(false, false, 0, false, false);
+    adc_set_clkdiv(0);
+}
+
+// обработчик прерывания DMA_IRQ_1: блок захвачен
+static void on_block_done(void)
+{
+    dma_channel_acknowledge_irq1(block_channel);
+    block_end_us = time_us_32();
+    adc_one_shot();
+    block_ready = true;
+    adc_user = ADC_FREE;
+}
+
+// ============================================================
+// ОБРАБОТЧИКИ БУДИЛЬНИКОВ
+// ============================================================
+
+static bool on_blink(repeating_timer_t *timer)
+{
+    (void)timer;
+    blink_on = !blink_on;
+    gpio_put(LED_PIN, blink_on);
+    blink_toggles++;
+    return true;
+}
 
 static bool on_capture(repeating_timer_t *timer)
 {
@@ -40,10 +101,13 @@ static bool on_capture(repeating_timer_t *timer)
         return true;
     }
 
-    // Захват окончен: АЦП свободен, будильник снимается
     adc_user = ADC_FREE;
     return false;
 }
+
+// ============================================================
+// ИНИЦИАЛИЗАЦИЯ ПЛАТФОРМЫ
+// ============================================================
 
 void platform_init(void)
 {
@@ -61,7 +125,17 @@ void platform_init(void)
     adc_init();
     adc_gpio_init(ADC_PIN);
     adc_set_temp_sensor_enabled(true);
+
+    // Настройка канала DMA и прерывания для блока
+    block_channel = dma_claim_unused_channel(true);
+    dma_channel_set_irq1_enabled(block_channel, true);
+    irq_set_exclusive_handler(DMA_IRQ_1, on_block_done);
+    irq_set_enabled(DMA_IRQ_1, true);
 }
+
+// ============================================================
+// УПРАВЛЕНИЕ СВЕТОДИОДОМ И КНОПКОЙ
+// ============================================================
 
 void platform_led_set(bool on)
 {
@@ -70,8 +144,12 @@ void platform_led_set(bool on)
 
 bool platform_button_read(void)
 {
-    return !gpio_get(BUTTON_PIN); // Инвертируем, так как кнопка замыкает на землю
+    return !gpio_get(BUTTON_PIN);
 }
+
+// ============================================================
+// АЦП (НАПРЯЖЕНИЕ, ТЕМПЕРАТУРА, ЗАРЯД)
+// ============================================================
 
 float platform_voltage_read(void)
 {
@@ -83,7 +161,6 @@ float platform_temp_read(void)
 {
     adc_select_input(ADC_TEMP_CHANNEL);
     float voltage = adc_read() * ADC_VREF_V / ADC_LEVELS;
-    // Формула из даташита: T = 27 - (U - 0.706) / 0.001721
     return 27.0f - (voltage - 0.706f) / 0.001721f;
 }
 
@@ -92,33 +169,16 @@ void platform_charge_set(bool on)
     gpio_put(CHARGE_PIN, on);
 }
 
-// --- Будильник индикатора ---
-static repeating_timer_t blink_timer;
-static bool blink_running = false;
-static volatile bool blink_on = false;
-static volatile uint32_t blink_toggles = 0;
-
-// Обработчик будильника
-static bool on_blink(repeating_timer_t *timer)
-{
-    (void)timer;
-    blink_on = !blink_on;
-    gpio_put(LED_PIN, blink_on);
-    blink_toggles++;
-    return true; // true — вызвать снова через тот же период
-}
+// ============================================================
+// БУДИЛЬНИК ИНДИКАТОРА
+// ============================================================
 
 bool platform_blink_start(uint32_t period_ms)
 {
-    if (period_ms < 10 || period_ms > 60000)
-    {
-        return false;
-    }
+    if (period_ms < 10 || period_ms > 60000) return false;
 
     platform_blink_stop();
     blink_toggles = 0;
-
-    // Минус перед периодом — отсчитывать от начала прошлого вызова
     blink_running = add_repeating_timer_ms(-(int32_t)period_ms, on_blink, NULL, &blink_timer);
     return blink_running;
 }
@@ -130,18 +190,19 @@ uint32_t platform_blink_stop(void)
         cancel_repeating_timer(&blink_timer);
         blink_running = false;
     }
-
     blink_on = false;
     gpio_put(LED_PIN, 0);
     return blink_toggles;
 }
 
+// ============================================================
+// ЗАХВАТ ПО ТАЙМЕРУ (cap_start / cap_dump)
+// ============================================================
+
 bool platform_capture_start(uint32_t count, uint32_t period_us)
 {
     if (adc_user != ADC_FREE || count == 0 || count > PLATFORM_CAPTURE_MAX || period_us == 0)
-    {
         return false;
-    }
 
     adc_select_input(ADC_CHANNEL);
     capture_count = count;
@@ -170,7 +231,8 @@ bool platform_capture_done(void)
 
 void platform_capture_get(platform_capture_t *capture)
 {
-    if (capture_count == 0) {
+    if (capture_count == 0)
+    {
         capture->samples = capture_samples;
         capture->count = 0;
         capture->period_us = 0;
@@ -179,11 +241,11 @@ void platform_capture_get(platform_capture_t *capture)
         capture->handler_percent = 0.0f;
         return;
     }
-    
+
     capture->samples = capture_samples;
     capture->count = capture_count;
     capture->period_us = capture_period_us;
-    // Считаем интервалы по тем отсчетам, что есть
+
     uint32_t min_int = UINT32_MAX;
     uint32_t max_int = 0;
     for (uint32_t i = 1; i < capture_index; i++)
@@ -194,7 +256,48 @@ void platform_capture_get(platform_capture_t *capture)
     }
     capture->min_interval_us = (capture_index > 1) ? min_int : 0;
     capture->max_interval_us = (capture_index > 1) ? max_int : 0;
-    
+
     uint32_t total_time = (capture_index > 1) ? (capture_times[capture_index - 1] - capture_times[0]) : 0;
     capture->handler_percent = (total_time > 0) ? (100.0f * capture_handler_us / total_time) : 0.0f;
+}
+
+// ============================================================
+// DMA БЛОК (dma_cap)
+// ============================================================
+
+bool platform_block_start(uint32_t count)
+{
+    if (adc_user != ADC_FREE || count == 0 || count > PLATFORM_BLOCK_MAX)
+        return false;
+
+    adc_free_running();
+
+    dma_channel_config cfg = dma_channel_get_default_config(block_channel);
+    channel_config_set_transfer_data_size(&cfg, DMA_SIZE_16);
+    channel_config_set_read_increment(&cfg, false);
+    channel_config_set_write_increment(&cfg, true);
+    channel_config_set_dreq(&cfg, DREQ_ADC);
+
+    block_ready = false;
+    adc_user = ADC_BLOCK;
+
+    dma_channel_configure(block_channel, &cfg, block_samples, &adc_hw->fifo, count, true);
+    block_start_us = time_us_32();
+    adc_run(true);
+    return true;
+}
+
+bool platform_block_done(void)
+{
+    return block_ready;
+}
+
+const uint16_t *platform_block_samples(void)
+{
+    return block_samples;
+}
+
+uint32_t platform_block_time_us(void)
+{
+    return block_end_us - block_start_us;
 }

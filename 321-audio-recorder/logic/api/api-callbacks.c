@@ -14,6 +14,7 @@
 #include "pi-task/pi-task.h"
 #include "platform/platform.h"
 #include "telemetry-task/telemetry-task.h"
+#include "block-task/block-task.h"
 
 #define TELEMETRY_DEFAULT_PERIOD_MS 100
 
@@ -307,6 +308,53 @@ static void cmd_cap_dump(const command_t *cmd)
     printf("\n");
 }
 
+static void print_dma_cap(const uint16_t *samples, uint32_t count, uint32_t time_us)
+{
+    if (count == 0) return;
+    
+    uint32_t min = samples[0], max = samples[0];
+    uint64_t sum = 0;
+    for (uint32_t i = 0; i < count; i++)
+    {
+        uint32_t v = samples[i];
+        if (v < min) min = v;
+        if (v > max) max = v;
+        sum += v;
+    }
+    float mean = (float)sum / count;
+    uint32_t expected_us = (uint32_t)((uint64_t)count * 1000000 / PLATFORM_SAMPLE_RATE_HZ);
+    
+    printf("dma_cap: %u samples in %u us, expected %u us, min %u max %u mean %.1f\n",
+           (unsigned)count, (unsigned)time_us, (unsigned)expected_us,
+           (unsigned)min, (unsigned)max, (double)mean);
+}
+
+static void cmd_dma_cap(const command_t *cmd)
+{
+    uint32_t count;
+    if (cmd->argc != 1 || !parse_u32(cmd->argv[0], &count))
+    {
+        printf("error: usage dma_cap <N>\n");
+        return;
+    }
+    if (count == 0 || count > PLATFORM_BLOCK_MAX)
+    {
+        printf("error: N must be 1..8192\n");
+        return;
+    }
+    if (telemetry_task_get_state() == TELEMETRY_STATE_RUN)
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+    if (!block_task_start(count, print_dma_cap))
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+    // Ответ придет позже, когда блок будет готов
+}
+
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
@@ -331,6 +379,7 @@ const api_command_t api_commands[] = {
     { "timer_blink_stop", "stop timer blink, number of toggles", cmd_timer_blink_stop },
     { "cap_start", "start capture: cap_start <N> <period_us>", cmd_cap_start },
     { "cap_dump", "dump last capture", cmd_cap_dump },
+    { "dma_cap", "capture block via DMA: dma_cap <N>", cmd_dma_cap },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);

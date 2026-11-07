@@ -9,6 +9,7 @@
 #include "systime/systime.h"
 #include "firmware.h"
 #include "telemetry-task/telemetry-task.h"
+#include "block-task/block-task.h"
 
 typedef enum { STOPWATCH_LOOP, STOPWATCH_COMMAND, STOPWATCH_LED, STOPWATCH_BUTTON, STOPWATCH_PI, STOPWATCH_TELEMETRY } stopwatch_id_t;
 
@@ -56,5 +57,6 @@ int main()
         profiling_start(STOPWATCH_TELEMETRY);
         telemetry_task_handle();
         profiling_stop(STOPWATCH_TELEMETRY);
+        block_task_handle();
     }
 }
