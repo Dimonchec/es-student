@@ -280,21 +280,19 @@ static void cmd_cap_start(const command_t *cmd)
 static void cmd_cap_dump(const command_t *cmd)
 {
     (void)cmd;
-    // Ждем завершения захвата (максимум 1 секунда)
+    // Ждем завершения (максимум 2 секунды)
     uint32_t start = systime_ms();
-    while (!platform_capture_done() && (systime_ms() - start) < 1000)
+    while (!platform_capture_done() && (systime_ms() - start) < 2000)
     {
-        // Пустой цикл ожидания (ничего не делаем)
+        // пустой цикл
     }
 
-    if (!platform_capture_done())
-    {
-        printf("error: no capture\n");
-        return;
-    }
-    
+    // <--- ЗАДЕРЖКА (чтобы точно дождаться)
+    for (volatile int i = 0; i < 100000; i++);
+
     platform_capture_t cap;
     platform_capture_get(&cap);
+    
     printf("capture: %u samples, period %u us, interval %u..%u us, handler %.1f %%\n",
            (unsigned)cap.count, (unsigned)cap.period_us,
            (unsigned)cap.min_interval_us, (unsigned)cap.max_interval_us,

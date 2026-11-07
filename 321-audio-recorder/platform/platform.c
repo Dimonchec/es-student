@@ -165,14 +165,20 @@ bool platform_adc_busy(void)
 
 bool platform_capture_done(void)
 {
-    return (adc_user == ADC_CAPTURE && capture_index >= capture_count);
+    return capture_index >= capture_count;
 }
 
 void platform_capture_get(platform_capture_t *capture)
 {
-    capture->samples = capture_samples;
-    capture->count = capture_count;
-    capture->period_us = capture_period_us;
+    if (capture_count == 0) {
+        capture->samples = capture_samples;
+        capture->count = 0;
+        capture->period_us = 0;
+        capture->min_interval_us = 0;
+        capture->max_interval_us = 0;
+        capture->handler_percent = 0.0f;
+        return;
+    }   
 
     // Разброс интервалов: min и max
     uint32_t min_int = UINT32_MAX;
