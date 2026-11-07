@@ -280,11 +280,19 @@ static void cmd_cap_start(const command_t *cmd)
 static void cmd_cap_dump(const command_t *cmd)
 {
     (void)cmd;
+    // Ждем завершения захвата (максимум 1 секунда)
+    uint32_t start = systime_ms();
+    while (!platform_capture_done() && (systime_ms() - start) < 1000)
+    {
+        // Пустой цикл ожидания (ничего не делаем)
+    }
+
     if (!platform_capture_done())
     {
         printf("error: no capture\n");
         return;
     }
+    
     platform_capture_t cap;
     platform_capture_get(&cap);
     printf("capture: %u samples, period %u us, interval %u..%u us, handler %.1f %%\n",
@@ -299,7 +307,6 @@ static void cmd_cap_dump(const command_t *cmd)
     }
     printf("\n");
 }
-
 
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
