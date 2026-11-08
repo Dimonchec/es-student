@@ -3,42 +3,42 @@
 устройство: 2e8a:000a
 серийный номер: 53032847491E7A9C
 порт: COM11
-начало: 2026-11-08T13:31:26
+начало: 2026-11-08T13:49:57
    0.000 --> 
-   0.500 --> help
-   0.500 <-- help
-   0.500 <-- help            list of commands
-   0.500 <-- info            device passport
-   0.500 <-- uptime          time since reset
-   0.500 <-- led_enable      turn LED on
-   0.500 <-- led_disable     turn LED off
-   0.500 <-- led_blink       start blinking
-   0.500 <-- led_period      set blink period in ms: led_period <ms>
-   0.500 <-- button          button state and press count
-   0.500 <-- pi_start        start pi calculation: pi_start [terms]
-   0.500 <-- pi              get last pi result
-   0.500 <-- profiling       show profiling stats
-   0.500 <-- profiling_reset reset profiling stats
-   0.500 <-- get_voltage     voltage on GP26, ADC input 0
-   0.500 <-- get_temp        chip temperature, degrees Celsius
-   0.500 <-- tm_start        start telemetry
-   0.500 <-- tm_stop         stop telemetry
-   0.500 <-- charge_on       turn charge on
-   0.500 <-- charge_off      turn charge off
-   0.500 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
-   0.500 <-- timer_blink_stop stop timer blink, number of toggles
-   0.500 <-- cap_start       start capture: cap_start <N> <period_us>
-   0.500 <-- cap_dump        dump last capture
-   0.500 <-- dma_cap         capture block via DMA: dma_cap <N>
-   0.500 <-- stream_start    start stream: stream_start [8|16]
-   0.500 <-- stream_stop     stop stream
-   0.500 <-- generate_tone   generate tone on GP20: generate_tone <Hz>
-   0.500 <-- wdt_enable      enable watchdog: wdt_enable <timeout_ms>
-   0.500 <-- hang            hang superloop
-   0.500 <-- reset_reason    show reset reason
-   0.500 <-- mic_bias        microphone bias voltage
-   0.547 <-- mic_level       microphone level: mic_level [<ms>]
-   1.547 --> info
+   0.546 --> help
+   0.562 <-- help
+   0.562 <-- help            list of commands
+   0.562 <-- info            device passport
+   0.562 <-- uptime          time since reset
+   0.562 <-- led_enable      turn LED on
+   0.562 <-- led_disable     turn LED off
+   0.562 <-- led_blink       start blinking
+   0.562 <-- led_period      set blink period in ms: led_period <ms>
+   0.562 <-- button          button state and press count
+   0.562 <-- pi_start        start pi calculation: pi_start [terms]
+   0.562 <-- pi              get last pi result
+   0.562 <-- profiling       show profiling stats
+   0.562 <-- profiling_reset reset profiling stats
+   0.562 <-- get_voltage     voltage on GP26, ADC input 0
+   0.562 <-- get_temp        chip temperature, degrees Celsius
+   0.562 <-- tm_start        start telemetry
+   0.562 <-- tm_stop         stop telemetry
+   0.562 <-- charge_on       turn charge on
+   0.562 <-- charge_off      turn charge off
+   0.562 <-- timer_blink_start blink led by timer: timer_blink_start <period_ms>
+   0.562 <-- timer_blink_stop stop timer blink, number of toggles
+   0.562 <-- cap_start       start capture: cap_start <N> <period_us>
+   0.562 <-- cap_dump        dump last capture
+   0.562 <-- dma_cap         capture block via DMA: dma_cap <N>
+   0.562 <-- stream_start    start stream: stream_start [8|16]
+   0.562 <-- stream_stop     stop stream
+   0.562 <-- generate_tone   generate tone on GP20: generate_tone <Hz>
+   0.562 <-- wdt_enable      enable watchdog: wdt_enable <timeout_ms>
+   0.562 <-- hang            hang superloop
+   0.562 <-- reset_reason    show reset reason
+   0.562 <-- mic_bias        microphone bias voltage
+   0.609 <-- mic_level       microphone level: mic_level [<ms>]
+   1.546 --> info
    1.609 <-- info
    1.609 <-- name: es-recorder
    1.609 <-- version: 1.0.0
@@ -48,22 +48,22 @@
    1.609 <-- serial: 53032847491E7A9C
    1.609 <-- chip: manufacturer 0x927, part 0x0002, revision 2
    1.609 <-- pico-sdk: 2.3.0
-   2.594 --> mic_bias
-   2.656 <-- mic_bias
-   2.719 <-- mic: bias 1.339 V
-   3.094 --> mic_level
-   3.156 <-- mic_level
-   3.219 <-- mic: level 1384.6 mV rms, peak 1957.8 mV, 100 ms
-   3.594 --> mic_level 50
-   3.656 <-- mic_level 50
-   3.656 <-- mic: level 1387.5 mV rms, peak 1715.3 mV, 50 ms
-   4.094 --> mic_level 185
+   2.546 --> mic_bias
+   2.609 <-- mic_bias
+   2.671 <-- mic: bias 1.392 V
+   3.046 --> mic_level
+   3.109 <-- mic_level
+   3.171 <-- mic: level 1421.9 mV rms, peak 1907.0 mV, 100 ms
+   3.546 --> mic_level 50
+   3.609 <-- mic_level 50
+   3.609 <-- mic: level 1419.1 mV rms, peak 1805.5 mV, 50 ms
+   4.093 --> mic_level 185
    4.156 <-- mic_level 185
-   4.344 <-- mic: level 1373.2 mV rms, peak 2002.9 mV, 184 ms
-   4.594 --> mic_level 0
+   4.343 <-- mic: level 1412.1 mV rms, peak 1948.1 mV, 184 ms
+   4.593 --> mic_level 0
    4.656 <-- mic_level 0
-   4.656 <-- error: usage mic_level [<ms>]
-   5.141 --> mic_level 200
-   5.203 <-- mic_level 200
-   5.203 <-- error: ms must be 1..185
+   4.656 <-- error: ms must be 1..185
+   5.093 --> mic_level 200
+   5.156 <-- mic_level 200
+   5.156 <-- error: ms must be 1..185
 итог: отправлено кадров 9, принято строк 53

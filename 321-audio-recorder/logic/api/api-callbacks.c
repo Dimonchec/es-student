@@ -534,13 +534,6 @@ static void start_block(uint32_t count, block_task_callback_t callback)
 
 #define MIC_DEFAULT_WINDOW_MS 100
 
-static void cmd_mic_bias(const command_t *cmd)
-{
-    (void)cmd;
-    // 4410 отсчётов = 100 мс при 44.1 кГц
-    start_block(4410, print_mic_bias);
-}
-
 static void cmd_mic_level(const command_t *cmd)
 {
     uint32_t ms = MIC_DEFAULT_WINDOW_MS;
@@ -553,21 +546,29 @@ static void cmd_mic_level(const command_t *cmd)
     {
         char *endptr;
         long val = strtol(cmd->argv[0], &endptr, 10);
-        if (*endptr != '\0' || val <= 0)
+        if (*endptr != '\0')  // <--- УБРАТЬ val <= 0
         {
             printf("error: usage mic_level [<ms>]\n");
             return;
         }
         ms = (uint32_t)val;
     }
-    if (ms == 0 || ms > 185)
+    if (ms == 0 || ms > 185)  // <--- ЭТО СРАБОТАЕТ ДЛЯ 0 и 200
     {
         printf("error: ms must be 1..185\n");
         return;
     }
-    // Число отсчётов = ms * 44100 / 1000
     uint32_t count = (uint32_t)((uint64_t)ms * PLATFORM_SAMPLE_RATE_HZ / 1000);
     start_block(count, print_mic_level);
+}
+
+static void cmd_mic_bias(const command_t *cmd);
+
+static void cmd_mic_bias(const command_t *cmd)
+{
+    (void)cmd;
+    // 4410 отсчётов = 100 мс при 44.1 кГц
+    start_block(4410, print_mic_bias);
 }
 
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
