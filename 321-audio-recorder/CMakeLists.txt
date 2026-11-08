@@ -45,7 +45,7 @@ target_include_directories(logic PUBLIC
 # Подключаем протокол как PUBLIC, остальные библиотеки как PRIVATE
 target_link_libraries(logic 
     PUBLIC stdio_text_protocol 
-    PRIVATE systime logging profiling device
+    PRIVATE systime logging profiling device m 
 )
 
 # 3. Главный исполняемый файл

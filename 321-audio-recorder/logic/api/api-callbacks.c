@@ -16,8 +16,11 @@
 #include "telemetry-task/telemetry-task.h"
 #include "block-task/block-task.h"
 #include "stream-task/stream-task.h"
+#include <math.h>
 
 #define TELEMETRY_DEFAULT_PERIOD_MS 100
+
+static void start_block(uint32_t count, block_task_callback_t callback);
 
 static bool parse_u32(const char *text, uint32_t *value)
 {
@@ -343,17 +346,7 @@ static void cmd_dma_cap(const command_t *cmd)
         printf("error: N must be 1..8192\n");
         return;
     }
-    if (telemetry_task_get_state() == TELEMETRY_STATE_RUN)
-    {
-        printf("error: adc busy\n");
-        return;
-    }
-    if (!block_task_start(count, print_dma_cap))
-    {
-        printf("error: adc busy\n");
-        return;
-    }
-    // Ответ придет позже, когда блок будет готов
+    start_block(count, print_dma_cap);
 }
 
 void api_send_frame(const stream_header_t *header, const uint8_t *data, uint32_t bytes)
@@ -476,6 +469,107 @@ static void cmd_reset_reason(const command_t *cmd)
     }
 }
 
+static void block_stats(const uint16_t *samples, uint32_t count, float *mean, float *rms, float *peak)
+{
+    uint32_t sum = 0;
+    for (uint32_t i = 0; i < count; i++)
+    {
+        sum += samples[i];
+    }
+    int32_t center = (int32_t)(sum / count);
+
+    uint64_t squares = 0;
+    uint32_t largest = 0;
+
+    for (uint32_t i = 0; i < count; i++)
+    {
+        int32_t deviation = (int32_t)samples[i] - center;
+        uint32_t size = deviation < 0 ? -deviation : deviation;
+        squares += (uint64_t)(deviation * deviation);
+        if (size > largest)
+        {
+            largest = size;
+        }
+    }
+
+    *mean = (float)sum / count;
+    *rms = sqrtf((float)squares / count);
+    *peak = (float)largest;
+}
+
+static void print_mic_bias(const uint16_t *samples, uint32_t count, uint32_t time_us)
+{
+    (void)time_us;
+    float mean, rms, peak;
+    block_stats(samples, count, &mean, &rms, &peak);
+    float volts = platform_adc_volts(mean);
+    printf("mic: bias %.3f V\n", volts);
+}
+
+static void print_mic_level(const uint16_t *samples, uint32_t count, uint32_t time_us)
+{
+    (void)time_us;
+    float mean, rms, peak;
+    block_stats(samples, count, &mean, &rms, &peak);
+    float rms_mv = rms * 1000 * ADC_VREF_V / ADC_LEVELS;
+    float peak_mv = peak * 1000 * ADC_VREF_V / ADC_LEVELS;
+    uint32_t window_ms = (uint32_t)((uint64_t)count * 1000 / PLATFORM_SAMPLE_RATE_HZ);
+    printf("mic: level %.1f mV rms, peak %.1f mV, %u ms\n",
+           (double)rms_mv, (double)peak_mv, (unsigned)window_ms);
+}
+
+static void start_block(uint32_t count, block_task_callback_t callback)
+{
+    if (telemetry_task_get_state() == TELEMETRY_STATE_RUN)
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+    if (!block_task_start(count, callback))
+    {
+        printf("error: adc busy\n");
+        return;
+    }
+}
+
+#define MIC_DEFAULT_WINDOW_MS 100
+
+static void cmd_mic_bias(const command_t *cmd)
+{
+    (void)cmd;
+    // 4410 отсчётов = 100 мс при 44.1 кГц
+    start_block(4410, print_mic_bias);
+}
+
+static void cmd_mic_level(const command_t *cmd)
+{
+    uint32_t ms = MIC_DEFAULT_WINDOW_MS;
+    if (cmd->argc > 1)
+    {
+        printf("error: usage mic_level [<ms>]\n");
+        return;
+    }
+    if (cmd->argc == 1)
+    {
+        char *endptr;
+        long val = strtol(cmd->argv[0], &endptr, 10);
+        if (*endptr != '\0' || val <= 0)
+        {
+            printf("error: usage mic_level [<ms>]\n");
+            return;
+        }
+        ms = (uint32_t)val;
+    }
+    if (ms == 0 || ms > 185)
+    {
+        printf("error: ms must be 1..185\n");
+        return;
+    }
+    // Число отсчётов = ms * 44100 / 1000
+    uint32_t count = (uint32_t)((uint64_t)ms * PLATFORM_SAMPLE_RATE_HZ / 1000);
+    start_block(count, print_mic_level);
+}
+
 // ТАБЛИЦА СТРОГО ПО ПРИЛОЖЕНИЮ Б (help первый)
 const api_command_t api_commands[] = {
     { "help",           "list of commands",                        cmd_help },
@@ -507,6 +601,8 @@ const api_command_t api_commands[] = {
     { "wdt_enable", "enable watchdog: wdt_enable <timeout_ms>", cmd_wdt_enable },
     { "hang", "hang superloop", cmd_hang },
     { "reset_reason", "show reset reason", cmd_reset_reason },
+    { "mic_bias", "microphone bias voltage", cmd_mic_bias },
+    { "mic_level", "microphone level: mic_level [<ms>]", cmd_mic_level },
 };
 
 const uint32_t api_command_count = sizeof(api_commands) / sizeof(api_commands[0]);
