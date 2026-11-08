@@ -44,7 +44,8 @@ void stream_task_handle(void)
     const uint8_t *data = platform_stream_next(&samples);
     if (data == NULL) return;
 
-    uint32_t bytes = samples * 2; // 16 бит
+    // <--- ВЫЧИСЛЯЕМ БАЙТЫ В ЗАВИСИМОСТИ ОТ РАЗРЯДНОСТИ
+    uint32_t bytes = (stream_bits == 16) ? samples * 2 : samples;
 
     stream_header_t header;
     header.sync_word = STREAM_SYNC_WORD;

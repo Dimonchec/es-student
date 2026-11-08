@@ -69,10 +69,11 @@ static volatile uint32_t blink_toggles = 0;
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ DMA
 // ============================================================
 
-static void adc_free_running(void)
+static void adc_free_running(uint8_t bits)
 {
     adc_select_input(ADC_CHANNEL);
-    adc_fifo_setup(true, true, 1, false, false);
+    // Последний аргумент: shift = true для 8 бит (старшие 8 из 12)
+    adc_fifo_setup(true, true, 1, false, bits == 8);
     adc_set_clkdiv(ADC_CLOCK_HZ / PLATFORM_SAMPLE_RATE_HZ - 1);
 }
 
@@ -148,7 +149,7 @@ static bool on_capture(repeating_timer_t *timer)
 
 void platform_init(void)
 {
-     watchdog_reset = watchdog_enable_caused_reboot();
+    watchdog_reset = watchdog_enable_caused_reboot();
     if (watchdog_reset)
     {
         watchdog_hw->scratch[0]++;
@@ -185,7 +186,8 @@ void platform_init(void)
     stream_channels[1] = dma_claim_unused_channel(true);
     irq_set_exclusive_handler(DMA_IRQ_0, on_stream_buffer);
     irq_set_enabled(DMA_IRQ_0, true);
-    // <--- ДОБАВИТЬ В КОНЕЦ platform_init()
+
+    // Настройка ШИМ для тона
     gpio_set_function(TONE_PIN, GPIO_FUNC_PWM);
     tone_slice = pwm_gpio_to_slice_num(TONE_PIN);
     pwm_config cfg = pwm_get_default_config();
@@ -331,7 +333,7 @@ bool platform_block_start(uint32_t count)
     if (adc_user != ADC_FREE || count == 0 || count > PLATFORM_BLOCK_MAX)
         return false;
 
-    adc_free_running();
+    adc_free_running(16); // Блок всегда 16 бит
 
     dma_channel_config cfg = dma_channel_get_default_config(block_channel);
     channel_config_set_transfer_data_size(&cfg, DMA_SIZE_16);
@@ -369,17 +371,18 @@ uint32_t platform_block_time_us(void)
 
 bool platform_stream_start(uint8_t bits)
 {
-    if (adc_user != ADC_FREE || bits != 16) return false;
+    if (adc_user != ADC_FREE || (bits != 16 && bits != 8)) return false;
 
-    stream_samples = PLATFORM_STREAM_BYTES / 2;
-    adc_free_running();
+    // Для 8 бит буфер вмещает 1024 отсчёта (по 1 байту), для 16 — 512 (по 2 байта)
+    stream_samples = PLATFORM_STREAM_BYTES / (bits == 16 ? 2 : 1);
+    adc_free_running(bits);
 
     for (int i = 0; i < 2; i++)
     {
         int next_channel = stream_channels[(i + 1) % 2];
 
         dma_channel_config cfg = dma_channel_get_default_config(stream_channels[i]);
-        channel_config_set_transfer_data_size(&cfg, DMA_SIZE_16);
+        channel_config_set_transfer_data_size(&cfg, (bits == 16) ? DMA_SIZE_16 : DMA_SIZE_8);
         channel_config_set_read_increment(&cfg, false);
         channel_config_set_write_increment(&cfg, true);
         channel_config_set_dreq(&cfg, DREQ_ADC);
@@ -459,6 +462,7 @@ void platform_write(const void *data, uint32_t bytes)
 {
     stdio_put_string((const char *)data, (int)bytes, false, false);
 }
+
 bool platform_tone_set(uint32_t freq_hz)
 {
     if (freq_hz == 0)
@@ -472,7 +476,6 @@ bool platform_tone_set(uint32_t freq_hz)
         return false;
     }
     
-    // Период в микросекундах
     uint32_t period_us = TONE_COUNT_HZ / freq_hz;
     uint16_t wrap = period_us - 1;
     uint16_t level = period_us / 2;
@@ -488,7 +491,6 @@ bool platform_watchdog_enable(uint32_t timeout_ms)
     {
         return false;
     }
-    // true — не считать, пока ядро остановлено отладчиком
     watchdog_enable(timeout_ms, true);
     return true;
 }

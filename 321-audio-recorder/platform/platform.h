@@ -11,9 +11,6 @@ void platform_charge_set(bool on);
 bool platform_blink_start(uint32_t period_ms);
 uint32_t platform_blink_stop(void);
 
-// ... (ваши старые прототипы) ...
-
-// <--- ДОБАВИТЬ ДЛЯ МИКРОФОНА
 #define ADC_VREF_V 3.3f
 #define ADC_LEVELS 4096
 
@@ -63,9 +60,9 @@ uint32_t platform_stream_overruns(void);
 void platform_write(const void *data, uint32_t bytes);
 
 // --- ГЕНЕРАТОР ТОНА ---
-bool platform_tone_set(uint32_t freq_hz); // <--- ДОБАВИТЬ
+bool platform_tone_set(uint32_t freq_hz);
+
+// --- СТОРОЖЕВОЙ ТАЙМЕР ---
 bool platform_watchdog_enable(uint32_t timeout_ms);
 void platform_watchdog_feed(void);
 bool platform_watchdog_caused_reset(uint32_t *restarts);
-
-float platform_adc_volts(float code);
