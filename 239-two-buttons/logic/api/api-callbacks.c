@@ -77,10 +77,10 @@ static void cmd_led_period(const command_t *cmd)
 static void cmd_button(const command_t *cmd)
 {
     (void)cmd;
-    bool pressed1 = button_task_is_pressed(PLATFORM_BUTTON_1);
-    uint32_t count1 = button_task_get_press_count(PLATFORM_BUTTON_1);
-    bool pressed2 = button_task_is_pressed(PLATFORM_BUTTON_2);
-    uint32_t count2 = button_task_get_press_count(PLATFORM_BUTTON_2);
+    bool pressed1 = button_task_is_pressed(PLATFORM_BUTTON_LED);
+    uint32_t count1 = button_task_get_press_count(PLATFORM_BUTTON_LED);
+    bool pressed2 = button_task_is_pressed(PLATFORM_BUTTON_PERIOD);
+    uint32_t count2 = button_task_get_press_count(PLATFORM_BUTTON_PERIOD);
     
     printf("button 1: %s, presses %u\n", pressed1 ? "pressed" : "released", (unsigned)count1);
     printf("button 2: %s, presses %u\n", pressed2 ? "pressed" : "released", (unsigned)count2);

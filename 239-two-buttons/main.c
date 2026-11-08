@@ -15,9 +15,11 @@ int main()
 {
     platform_init();
     led_task_init();
-    // Инициализируем ДВЕ кнопки с разными колбэками
-    button_task_init(PLATFORM_BUTTON_1, led_task_next_state);
-    button_task_init(PLATFORM_BUTTON_2, led_task_next_period);
+    
+    // <--- РОВНО ДВА ВЫЗОВА
+    button_task_init(PLATFORM_BUTTON_LED, led_task_next_state, led_task_blink);
+    button_task_init(PLATFORM_BUTTON_PERIOD, led_task_next_period, NULL);
+    
     pi_task_init();
     stdio_text_protocol_init();
     profiling_init();

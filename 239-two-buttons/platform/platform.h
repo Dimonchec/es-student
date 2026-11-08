@@ -3,8 +3,8 @@
 
 // Перечисление кнопок
 typedef enum {
-    PLATFORM_BUTTON_1 = 0,
-    PLATFORM_BUTTON_2 = 1,
+    PLATFORM_BUTTON_LED = 0,
+    PLATFORM_BUTTON_PERIOD = 1,
     PLATFORM_BUTTON_COUNT
 } platform_button_t;
 

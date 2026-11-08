@@ -30,8 +30,8 @@ void platform_led_set(bool on)
 bool platform_button_read(platform_button_t button)
 {
     switch (button) {
-        case PLATFORM_BUTTON_1: return !gpio_get(BUTTON_1_PIN);
-        case PLATFORM_BUTTON_2: return !gpio_get(BUTTON_2_PIN);
+        case PLATFORM_BUTTON_LED: return !gpio_get(BUTTON_1_PIN);
+        case PLATFORM_BUTTON_PERIOD: return !gpio_get(BUTTON_2_PIN);
         default: return false;
     }
 }
